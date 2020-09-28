@@ -202,6 +202,7 @@ GameObject:
   - component: {fileID: 85463344}
   - component: {fileID: 85463343}
   - component: {fileID: 85463346}
+  - component: {fileID: 85463347}
   m_Layer: 0
   m_Name: View White
   m_TagString: MainCamera
@@ -305,6 +306,18 @@ MonoBehaviour:
   m_RequiresDepthTexture: 0
   m_RequiresColorTexture: 0
   m_Version: 2
+--- !u!114 &85463347
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 85463342}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3616dc0dd0bafc84ba077a102dfb57a1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &91613698
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -595,11 +608,11 @@ GameObject:
   - component: {fileID: 472280994}
   m_Layer: 0
   m_Name: View Black
-  m_TagString: Untagged
+  m_TagString: MainCamera
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &472280994
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2663,7 +2676,7 @@ GameObject:
   - component: {fileID: 6189337839385211908}
   - component: {fileID: 2229032678190997824}
   - component: {fileID: 5064903593772725542}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Board
   m_TagString: Untagged
   m_Icon: {fileID: 0}
