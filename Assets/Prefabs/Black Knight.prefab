@@ -77,5 +77,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Black Knight
       objectReference: {fileID: 0}
+    - target: {fileID: 6429209765521399895, guid: ba5dff55c94e2e141ba1d9e73c506a73,
+        type: 3}
+      propertyPath: _color
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ba5dff55c94e2e141ba1d9e73c506a73, type: 3}

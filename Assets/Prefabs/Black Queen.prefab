@@ -77,5 +77,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Black Queen
       objectReference: {fileID: 0}
+    - target: {fileID: 6072247201407462130, guid: d9baee7c4092a3240a78fc5119916871,
+        type: 3}
+      propertyPath: _color
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d9baee7c4092a3240a78fc5119916871, type: 3}

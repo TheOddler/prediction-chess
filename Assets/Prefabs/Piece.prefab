@@ -94,6 +94,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b75b513b98bf82240b2541fcf24f59cb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _color: 0
 --- !u!136 &3345442923981007368
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -167,9 +168,9 @@ LineRenderer:
         outWeight: 0.33333334
       - serializedVersion: 3
         time: 1
-        value: 0.01
-        inSlope: -0.28761888
-        outSlope: -0.28761888
+        value: 0.015
+        inSlope: -0.28261888
+        outSlope: -0.28261888
         tangentMode: 34
         weightedMode: 0
         inWeight: 0.33333334

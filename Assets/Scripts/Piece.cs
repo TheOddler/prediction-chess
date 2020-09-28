@@ -4,6 +4,10 @@ using UnityEngine;
 
 public class Piece : MonoBehaviour
 {
+    [SerializeField]
+    Color _color;
+    public Color Color => _color;
+
     BoardPosition _pos;
     BoardPosition? _move = null;
 
@@ -24,13 +28,15 @@ public class Piece : MonoBehaviour
 
     public void SetMove(Vector3 worldPos)
     {
-        _move = new BoardPosition(worldPos);
-        UpdateLineRenderer();
-    }
-
-    public void RemoveMove()
-    {
-        _move = null;
+        var move = new BoardPosition(worldPos);
+        if (move == _pos)
+        {
+            _move = null;
+        }
+        else
+        {
+            _move = move;
+        }
         UpdateLineRenderer();
     }
 

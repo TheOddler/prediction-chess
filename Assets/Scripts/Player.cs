@@ -16,13 +16,11 @@ public class Player : MonoBehaviour
         }
     }
 
+    [SerializeField]
+    Color _color;
+    public Color Color => _color;
+
     Piece _selected;
-
-    // Start is called before the first frame update
-    void Start()
-    {
-
-    }
 
     // Update is called once per frame
     void Update()
@@ -35,14 +33,7 @@ public class Player : MonoBehaviour
         else if (Input.GetMouseButton(0) && _selected != null)
         {
             var hit = GetHit();
-            if (hit.piece == null)
-            {
-                _selected.SetMove(hit.position);
-            }
-            else
-            {
-                _selected.RemoveMove();
-            }
+            _selected.SetMove(hit.position);
         }
     }
 
