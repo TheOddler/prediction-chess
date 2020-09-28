@@ -44,7 +44,8 @@ public class Piece : MonoBehaviour
     {
         if (_move == null)
         {
-            _lineRenderer.SetPositions(new[] { Vector3.zero, Vector3.zero });
+            var hidden = new Vector3(0, -1, 0);
+            _lineRenderer.SetPositions(new[] { hidden, hidden });
         }
         else
         {

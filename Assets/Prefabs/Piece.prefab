@@ -168,9 +168,9 @@ LineRenderer:
         outWeight: 0.33333334
       - serializedVersion: 3
         time: 1
-        value: 0.015
-        inSlope: -0.28261888
-        outSlope: -0.28261888
+        value: 0.03
+        inSlope: -0.26761886
+        outSlope: -0.26761886
         tangentMode: 34
         weightedMode: 0
         inWeight: 0.33333334
@@ -208,7 +208,7 @@ LineRenderer:
       m_NumColorKeys: 2
       m_NumAlphaKeys: 2
     numCornerVertices: 0
-    numCapVertices: 0
+    numCapVertices: 1
     alignment: 0
     textureMode: 0
     shadowBias: 0.5
