@@ -10,6 +10,7 @@ public class Piece : MonoBehaviour
 
     BoardPosition _pos;
     BoardPosition? _move = null;
+    BoardPosition? _prediction = null;
 
     LineRenderer _lineRenderer;
 
@@ -26,6 +27,25 @@ public class Piece : MonoBehaviour
         UpdateLineRenderer();
     }
 
+    public bool IsMine()
+    {
+        return Player.LocalNetworkPlayerColor() == _color;
+    }
+
+    public void SetMoveOrPrediction(Vector3 worldPos)
+    {
+        if (IsMine())
+        {
+            SetMove(worldPos);
+        }
+
+
+        else
+        {
+            SetPrediction(worldPos);
+        }
+    }
+
     public void SetMove(Vector3 worldPos)
     {
         var move = new BoardPosition(worldPos);
@@ -40,19 +60,40 @@ public class Piece : MonoBehaviour
         UpdateLineRenderer();
     }
 
-    void UpdateLineRenderer()
+    public void SetPrediction(Vector3 worldPos)
     {
-        if (_move == null)
+        var prediction = new BoardPosition(worldPos);
+        if (prediction == _pos)
         {
-            var hidden = new Vector3(0, -1, 0);
-            _lineRenderer.SetPositions(new[] { hidden, hidden });
+            _prediction = null;
         }
         else
+        {
+            _prediction = prediction;
+        }
+        UpdateLineRenderer();
+    }
+
+    void UpdateLineRenderer()
+    {
+        if (_move != null)
         {
             Vector3 pos = _pos.worldPosition;
             Vector3 move = ((BoardPosition)_move).worldPosition;
             pos.y = move.y = 0.2f;
             _lineRenderer.SetPositions(new[] { pos, move });
+        }
+        else if (_prediction != null)
+        {
+            Vector3 pos = _pos.worldPosition;
+            Vector3 prediction = ((BoardPosition)_prediction).worldPosition;
+            pos.y = prediction.y = 0.2f;
+            _lineRenderer.SetPositions(new[] { pos, prediction });
+        }
+        else
+        {
+            var hidden = new Vector3(0, -1, 0);
+            _lineRenderer.SetPositions(new[] { hidden, hidden });
         }
     }
 }

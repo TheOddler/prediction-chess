@@ -204,7 +204,7 @@ GameObject:
   - component: {fileID: 85463346}
   - component: {fileID: 85463347}
   m_Layer: 0
-  m_Name: View White
+  m_Name: White Player
   m_TagString: MainCamera
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -786,7 +786,7 @@ GameObject:
   - component: {fileID: 472280994}
   - component: {fileID: 472280998}
   m_Layer: 0
-  m_Name: View Black
+  m_Name: Black Player
   m_TagString: MainCamera
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

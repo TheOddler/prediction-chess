@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Photon.Pun;
 using UnityEngine;
 
 public class Player : MonoBehaviour
@@ -22,6 +23,11 @@ public class Player : MonoBehaviour
 
     Piece _selected;
 
+    void Start()
+    {
+        gameObject.SetActive(IsMe());
+    }
+
     // Update is called once per frame
     void Update()
     {
@@ -33,8 +39,23 @@ public class Player : MonoBehaviour
         else if (Input.GetMouseButton(0) && _selected != null)
         {
             var hit = GetHit();
-            _selected.SetMove(hit.position);
+            _selected.SetMoveOrPrediction(hit.position);
         }
+    }
+
+    bool IsMe()
+    {
+        return LocalNetworkPlayerColor() == _color;
+    }
+
+    public static ChessColor LocalNetworkPlayerColor()
+    {
+        if (Application.isEditor && !PhotonNetwork.IsConnected) // In the editor (when not connected) we're white
+        {
+            return ChessColor.White;
+        }
+
+        return PhotonNetwork.IsMasterClient ? ChessColor.White : ChessColor.Black;
     }
 
     HitInfo GetHit()
