@@ -69,7 +69,7 @@ public class Launcher : MonoBehaviourPunCallbacks
     {
         Debug.Log("OnJoinedRoom()");
 
-        SceneManager.LoadScene(1);
+        SceneManager.LoadScene(1); // PhotonNetwork.LoadLevel()
     }
 
     private void SetInterfaceConnected(bool connected)
