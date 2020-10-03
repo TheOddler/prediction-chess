@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
 
@@ -12,6 +10,12 @@ public class Launcher : MonoBehaviourPunCallbacks
     [SerializeField]
     byte _maxPlayersPerRoom = 2;
 
+    [SerializeField]
+    GameObject _controlPanel;
+
+    [SerializeField]
+    GameObject _progressLabel;
+
     void Awake()
     {
         PhotonNetwork.AutomaticallySyncScene = true; // Allows us to use PhotonNetwork.LoadLevel() which will load a new scene for all connected clients
@@ -19,19 +23,22 @@ public class Launcher : MonoBehaviourPunCallbacks
 
     void Start()
     {
-        Connect();
+        SetInterfaceConnected(PhotonNetwork.IsConnected);
+
+        if (!PhotonNetwork.IsConnected)
+        {
+            PhotonNetwork.ConnectUsingSettings();
+            PhotonNetwork.GameVersion = _gameVersion;
+        }
     }
 
-    void Connect()
+    public void JoinRandomRoom()
     {
         if (PhotonNetwork.IsConnected)
         {
             PhotonNetwork.JoinRandomRoom();
-        }
-        else
-        {
-            PhotonNetwork.ConnectUsingSettings();
-            PhotonNetwork.GameVersion = _gameVersion;
+
+            SetInterfaceConnected(false);
         }
     }
 
@@ -39,12 +46,14 @@ public class Launcher : MonoBehaviourPunCallbacks
     {
         Debug.Log("OnConnectedToMaster()");
 
-        PhotonNetwork.JoinRandomRoom();
+        SetInterfaceConnected(true);
     }
 
     public override void OnDisconnected(DisconnectCause cause)
     {
         Debug.LogWarningFormat(" OnDisconnected({0})", cause);
+
+        SetInterfaceConnected(true);
     }
 
     public override void OnJoinRandomFailed(short returnCode, string message)
@@ -58,5 +67,11 @@ public class Launcher : MonoBehaviourPunCallbacks
     public override void OnJoinedRoom()
     {
         Debug.Log("OnJoinedRoom()");
+    }
+
+    private void SetInterfaceConnected(bool connected)
+    {
+        _controlPanel.SetActive(connected);
+        _progressLabel.SetActive(!connected);
     }
 }
