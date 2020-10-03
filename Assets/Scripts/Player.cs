@@ -17,8 +17,8 @@ public class Player : MonoBehaviour
     }
 
     [SerializeField]
-    Color _color;
-    public Color Color => _color;
+    ChessColor _color;
+    public ChessColor Color => _color;
 
     Piece _selected;
 

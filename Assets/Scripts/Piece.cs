@@ -5,8 +5,8 @@ using UnityEngine;
 public class Piece : MonoBehaviour
 {
     [SerializeField]
-    Color _color;
-    public Color Color => _color;
+    ChessColor _color;
+    public ChessColor Color => _color;
 
     BoardPosition _pos;
     BoardPosition? _move = null;
