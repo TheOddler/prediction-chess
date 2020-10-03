@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
+using UnityEngine.SceneManagement;
 
 public class Launcher : MonoBehaviourPunCallbacks
 {
@@ -53,7 +54,7 @@ public class Launcher : MonoBehaviourPunCallbacks
     {
         Debug.LogWarningFormat(" OnDisconnected({0})", cause);
 
-        SetInterfaceConnected(true);
+        Application.Quit();
     }
 
     public override void OnJoinRandomFailed(short returnCode, string message)
@@ -67,6 +68,8 @@ public class Launcher : MonoBehaviourPunCallbacks
     public override void OnJoinedRoom()
     {
         Debug.Log("OnJoinedRoom()");
+
+        SceneManager.LoadScene(1);
     }
 
     private void SetInterfaceConnected(bool connected)
