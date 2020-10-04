@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using Photon.Pun;
 using UnityEngine;
+using System.Linq;
+using UnityEngine.UI;
 
-public class Player : MonoBehaviour
+public class Player : MonoBehaviourPun
 {
     struct HitInfo
     {
@@ -21,6 +23,34 @@ public class Player : MonoBehaviour
     ChessColor _color;
     public ChessColor Color => _color;
 
+    [SerializeField]
+    Toggle _isDoneToggle;
+    bool _isDone = false;
+    public bool IsDone
+    {
+        get => _isDone;
+        set
+        {
+            _isDone = value;
+            _isDoneToggle.isOn = value;
+            photonView.RPC(nameof(RPCSyncIsDone), RpcTarget.Others, value);
+        }
+    }
+
+    static Player _localPlayer = null;
+    public static Player LocalPlayer
+    {
+        get
+        {
+            if (_localPlayer == null)
+            {
+                var players = FindObjectsOfType<Player>();
+                _localPlayer = players.First(p => p.IsMe());
+            }
+            return _localPlayer;
+        }
+    }
+
     Piece _selected;
 
     void Start()
@@ -31,15 +61,18 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetMouseButtonDown(0))
+        if (!IsDone)
         {
-            var hit = GetHit();
-            _selected = hit.piece;
-        }
-        else if (Input.GetMouseButton(0) && _selected != null)
-        {
-            var hit = GetHit();
-            _selected.SetMoveOrPrediction(hit.position);
+            if (Input.GetMouseButtonDown(0))
+            {
+                var hit = GetHit();
+                _selected = hit.piece;
+            }
+            else if (Input.GetMouseButton(0) && _selected != null)
+            {
+                var hit = GetHit();
+                _selected.SetMoveOrPrediction(hit.position);
+            }
         }
     }
 
@@ -56,6 +89,13 @@ public class Player : MonoBehaviour
         }
 
         return PhotonNetwork.IsMasterClient ? ChessColor.White : ChessColor.Black;
+    }
+
+    [PunRPC]
+    private void RPCSyncIsDone(bool isDone)
+    {
+        _isDone = isDone;
+        _isDoneToggle.isOn = isDone;
     }
 
     HitInfo GetHit()
