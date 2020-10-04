@@ -48,4 +48,9 @@ public struct BoardPosition
     {
         return !(a == b);
     }
+
+    public override string ToString()
+    {
+        return $"({x},{y})";
+    }
 }
