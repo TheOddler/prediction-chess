@@ -55,12 +55,14 @@ public class Piece : MonoBehaviourPun
                 move = null;
             }
 
-            photonView.RPC(nameof(RPCSetMove), RpcTarget.All, move);
+            _move = move;
+            UpdateLineRenderer();
+            photonView.RPC(nameof(RPCSyncMove), RpcTarget.Others, move);
         }
     }
 
     [PunRPC]
-    private void RPCSetMove(BoardPosition? move)
+    private void RPCSyncMove(BoardPosition? move)
     {
         _move = move;
         UpdateLineRenderer();
@@ -76,12 +78,14 @@ public class Piece : MonoBehaviourPun
                 prediction = null;
             }
 
-            photonView.RPC(nameof(RPCSetPrediction), RpcTarget.All, prediction);
+            _prediction = prediction;
+            UpdateLineRenderer();
+            photonView.RPC(nameof(RPCSyncPrediction), RpcTarget.Others, prediction);
         }
     }
 
     [PunRPC]
-    private void RPCSetPrediction(BoardPosition? prediction)
+    private void RPCSyncPrediction(BoardPosition? prediction)
     {
         _prediction = prediction;
         UpdateLineRenderer();
