@@ -45,30 +45,22 @@ public class Launcher : MonoBehaviourPunCallbacks
 
     public override void OnConnectedToMaster()
     {
-        Debug.Log("OnConnectedToMaster()");
-
         SetInterfaceConnected(true);
     }
 
     public override void OnDisconnected(DisconnectCause cause)
     {
-        Debug.LogWarningFormat(" OnDisconnected({0})", cause);
-
         Application.Quit();
     }
 
     public override void OnJoinRandomFailed(short returnCode, string message)
     {
-        Debug.LogFormat("OnJoinRandomFailed({0}, {1})", returnCode, message);
-
         // Random join failed, maybe all are full, so let's create our own
         PhotonNetwork.CreateRoom(null, new RoomOptions { MaxPlayers = _maxPlayersPerRoom });
     }
 
     public override void OnJoinedRoom()
     {
-        Debug.Log("OnJoinedRoom()");
-
         SceneManager.LoadScene(1); // PhotonNetwork.LoadLevel()
     }
 
