@@ -4,18 +4,18 @@ using UnityEngine;
 [Serializable]
 public struct BoardPosition
 {
-    public int x;
-    public int y;
+    public byte x;
+    public byte y;
 
     public Vector3 worldPosition => new Vector3(x - 3.5f, 0, y - 3.5f);
 
-    public BoardPosition(int x, int y)
+    public BoardPosition(byte x, byte y)
     {
-        this.x = Mathf.Clamp(x, 0, 7);
-        this.y = Mathf.Clamp(y, 0, 7);
+        this.x = Mathb.Clamp(x, 0, 7);
+        this.y = Mathb.Clamp(y, 0, 7);
     }
 
-    public BoardPosition(Vector3 worldPosition) : this(Mathf.RoundToInt(worldPosition.x + 3.5f), Mathf.RoundToInt(worldPosition.z + 3.5f))
+    public BoardPosition(Vector3 worldPosition) : this(Mathb.RoundToByte(worldPosition.x + 3.5f), Mathb.RoundToByte(worldPosition.z + 3.5f))
     {
     }
 

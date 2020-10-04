@@ -37,54 +37,66 @@ public class Piece : MonoBehaviourPun
     {
         if (IsMine())
         {
-            photonView.RPC("SetMoveRpc", RpcTarget.All, worldPos);
+            SetMove(worldPos);
         }
         else
         {
-            photonView.RPC("SetPredictionRpc", RpcTarget.All, worldPos);
+            SetPrediction(worldPos);
+        }
+    }
+
+    public void SetMove(Vector3 worldPos)
+    {
+        BoardPosition? move = new BoardPosition(worldPos);
+        if (move != _move)
+        {
+            if (move == _pos)
+            {
+                move = null;
+            }
+
+            photonView.RPC(nameof(RPCSetMove), RpcTarget.All, move);
         }
     }
 
     [PunRPC]
-    private void SetMoveRpc(Vector3 worldPos)
+    private void RPCSetMove(BoardPosition? move)
     {
-        var move = new BoardPosition(worldPos);
-        if (move == _pos)
-        {
-            _move = null;
-        }
-        else
-        {
-            _move = move;
-        }
+        _move = move;
         UpdateLineRenderer();
     }
 
-    [PunRPC]
-    private void SetPredictionRpc(Vector3 worldPos)
+    public void SetPrediction(Vector3 worldPos)
     {
-        var prediction = new BoardPosition(worldPos);
-        if (prediction == _pos)
+        BoardPosition? prediction = new BoardPosition(worldPos);
+        if (prediction != _prediction)
         {
-            _prediction = null;
+            if (prediction == _pos)
+            {
+                prediction = null;
+            }
+
+            photonView.RPC(nameof(RPCSetPrediction), RpcTarget.All, prediction);
         }
-        else
-        {
-            _prediction = prediction;
-        }
+    }
+
+    [PunRPC]
+    private void RPCSetPrediction(BoardPosition? prediction)
+    {
+        _prediction = prediction;
         UpdateLineRenderer();
     }
 
     void UpdateLineRenderer()
     {
-        if (_move != null)
+        if (_move != null && IsMine())
         {
             Vector3 pos = _pos.worldPosition;
             Vector3 move = ((BoardPosition)_move).worldPosition;
             pos.y = move.y = 0.2f;
             _lineRenderer.SetPositions(new[] { pos, move });
         }
-        else if (_prediction != null)
+        else if (_prediction != null && !IsMine())
         {
             Vector3 pos = _pos.worldPosition;
             Vector3 prediction = ((BoardPosition)_prediction).worldPosition;

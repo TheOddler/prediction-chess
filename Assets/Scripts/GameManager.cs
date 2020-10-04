@@ -9,6 +9,8 @@ public class GameManager : MonoBehaviourPunCallbacks
 {
     void Awake()
     {
+        CustomTypeSerialization.RegisterTypes();
+
         if (Application.isEditor && SceneManager.GetActiveScene().buildIndex != 0 && !PhotonNetwork.IsConnected)
         {
             PhotonNetwork.OfflineMode = true;
