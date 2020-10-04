@@ -1,8 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Photon.Pun;
 using UnityEngine;
 
-public class Piece : MonoBehaviour
+public class Piece : MonoBehaviourPun
 {
     [SerializeField]
     ChessColor _color;
@@ -36,17 +37,16 @@ public class Piece : MonoBehaviour
     {
         if (IsMine())
         {
-            SetMove(worldPos);
+            photonView.RPC("SetMoveRpc", RpcTarget.All, worldPos);
         }
-
-
         else
         {
-            SetPrediction(worldPos);
+            photonView.RPC("SetPredictionRpc", RpcTarget.All, worldPos);
         }
     }
 
-    public void SetMove(Vector3 worldPos)
+    [PunRPC]
+    private void SetMoveRpc(Vector3 worldPos)
     {
         var move = new BoardPosition(worldPos);
         if (move == _pos)
@@ -60,7 +60,8 @@ public class Piece : MonoBehaviour
         UpdateLineRenderer();
     }
 
-    public void SetPrediction(Vector3 worldPos)
+    [PunRPC]
+    private void SetPredictionRpc(Vector3 worldPos)
     {
         var prediction = new BoardPosition(worldPos);
         if (prediction == _pos)

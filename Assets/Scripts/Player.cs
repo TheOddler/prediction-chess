@@ -50,7 +50,7 @@ public class Player : MonoBehaviour
 
     public static ChessColor LocalNetworkPlayerColor()
     {
-        if (Application.isEditor && !PhotonNetwork.IsConnected) // In the editor (when not connected) we're white
+        if (PhotonNetwork.OfflineMode) // In the editor (when not connected) we're white
         {
             return ChessColor.White;
         }
