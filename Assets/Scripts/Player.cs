@@ -1,10 +1,11 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿
 using Photon.Pun;
 using UnityEngine;
-using System.Linq;
 using UnityEngine.UI;
+using UnityEngine.Assertions;
 
+[RequireComponent(typeof(Camera))]
+[RequireComponent(typeof(AudioListener))]
 public class Player : MonoBehaviourPun
 {
     struct HitInfo
@@ -26,42 +27,37 @@ public class Player : MonoBehaviourPun
     [SerializeField]
     Toggle _isDoneToggle;
     bool _isDone = false;
-    public bool IsDone
-    {
-        get => _isDone;
-        set
-        {
-            _isDone = value;
-            _isDoneToggle.isOn = value;
-            photonView.RPC(nameof(RPCSyncIsDone), RpcTarget.Others, value);
-        }
-    }
 
-    static Player _localPlayer = null;
-    public static Player LocalPlayer
-    {
-        get
-        {
-            if (_localPlayer == null)
-            {
-                var players = FindObjectsOfType<Player>();
-                _localPlayer = players.First(p => p.IsMe());
-            }
-            return _localPlayer;
-        }
-    }
+    public static Player LocalPlayer { get; private set; }
+    public static Player RemotePlayer { get; private set; }
+    public Player OtherPlayer => LocalPlayer == this ? RemotePlayer : LocalPlayer;
 
     Piece _selected;
 
-    void Start()
+    void Awake()
     {
-        gameObject.SetActive(IsMe());
+        Assert.IsNotNull(_isDoneToggle);
+        Assert.AreEqual(_isDone, _isDoneToggle.isOn);
+
+        if (IsMe())
+        {
+            Assert.IsNull(LocalPlayer);
+            LocalPlayer = this;
+        }
+        else
+        {
+            Assert.IsNull(RemotePlayer);
+            RemotePlayer = this;
+        }
+        enabled = IsMe();
+        GetComponent<Camera>().enabled = enabled;
+        GetComponent<AudioListener>().enabled = enabled;
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (!IsDone)
+        if (!_isDone)
         {
             if (Input.GetMouseButtonDown(0))
             {
@@ -91,11 +87,27 @@ public class Player : MonoBehaviourPun
         return PhotonNetwork.IsMasterClient ? ChessColor.White : ChessColor.Black;
     }
 
-    [PunRPC]
-    private void RPCSyncIsDone(bool isDone)
+    public void SetIsDone(bool isDone)
+    {
+        HandleIsDone(isDone);
+        photonView.RPC(nameof(RPCSyncIsDone), RpcTarget.Others, isDone);
+    }
+
+    private void HandleIsDone(bool isDone)
     {
         _isDone = isDone;
         _isDoneToggle.isOn = isDone;
+
+        if (_isDone && OtherPlayer._isDone)
+        {
+            GameManager.Instance.ResolveBattle();
+        }
+    }
+
+    [PunRPC]
+    private void RPCSyncIsDone(bool isDone)
+    {
+        HandleIsDone(isDone);
     }
 
     HitInfo GetHit()

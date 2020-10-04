@@ -8,8 +8,8 @@ public class InterfaceHelpers : MonoBehaviour
         PhotonNetwork.LeaveRoom();
     }
 
-    public void SetLocalPlayerDone(bool done)
+    public void SetLocalPlayerDone(bool isDone)
     {
-        Player.LocalPlayer.IsDone = done;
+        Player.LocalPlayer.SetIsDone(isDone);
     }
 }

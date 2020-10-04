@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using Photon.Pun;
+﻿using Photon.Pun;
 using UnityEngine;
 
 public class Piece : MonoBehaviourPun
@@ -9,16 +7,35 @@ public class Piece : MonoBehaviourPun
     ChessColor _color;
     public ChessColor Color => _color;
 
-    BoardPosition _pos;
-    BoardPosition? _move = null;
-    BoardPosition? _prediction = null;
+    public BoardPosition Position { get; private set; }
+    public BoardPosition? Move { get; private set; } = null;
+    public BoardPosition? Prediction { get; private set; } = null;
+
+    public bool IsDead { get; private set; } = false;
 
     LineRenderer _lineRenderer;
 
+    public int Power
+    {
+        get
+        {
+            int power = 0; // Default power of 0
+            if (Move != null)
+            {
+                power += 1; // Add one power when moving, you prepared for battle since you were moving, so you're stronger
+            }
+            if (Move == Prediction)
+            {
+                power -= 1; // Remove one power when correctly predicted, the opponent predicted your move, so you're weaker
+            }
+            return power;
+        }
+    }
+
     void Awake()
     {
-        _pos = new BoardPosition(transform.position);
-        transform.position = _pos.worldPosition;
+        Position = new BoardPosition(transform.position);
+        transform.position = Position.worldPosition;
 
         _lineRenderer = GetComponent<LineRenderer>();
     }
@@ -28,9 +45,33 @@ public class Piece : MonoBehaviourPun
         UpdateLineRenderer();
     }
 
+    void Update()
+    {
+        if (IsDead)
+        {
+            transform.Translate(0, -Time.deltaTime, 0);
+        }
+    }
+
     public bool IsMine()
     {
         return Player.LocalNetworkPlayerColor() == _color;
+    }
+
+    public void SetPos(BoardPosition pos)
+    {
+        if (pos != Position)
+        {
+            photonView.RPC(nameof(RPCSyncPos), RpcTarget.All, pos);
+        }
+    }
+
+    [PunRPC]
+    private void RPCSyncPos(BoardPosition pos)
+    {
+        transform.position = pos.worldPosition;
+        Position = pos;
+        UpdateLineRenderer();
     }
 
     public void SetMoveOrPrediction(Vector3 worldPos)
@@ -48,62 +89,79 @@ public class Piece : MonoBehaviourPun
     public void SetMove(Vector3 worldPos)
     {
         BoardPosition? move = new BoardPosition(worldPos);
-        if (move != _move)
+        if (move != Move)
         {
-            if (move == _pos)
+            if (move == Position)
             {
                 move = null;
             }
 
-            _move = move;
-            UpdateLineRenderer();
-            photonView.RPC(nameof(RPCSyncMove), RpcTarget.Others, move);
+            photonView.RPC(nameof(RPCSyncMove), RpcTarget.All, move);
         }
+    }
+
+    public void ResetMove()
+    {
+        SetMove(transform.position);
     }
 
     [PunRPC]
     private void RPCSyncMove(BoardPosition? move)
     {
-        _move = move;
+        Move = move;
         UpdateLineRenderer();
     }
 
     public void SetPrediction(Vector3 worldPos)
     {
         BoardPosition? prediction = new BoardPosition(worldPos);
-        if (prediction != _prediction)
+        if (prediction != Prediction)
         {
-            if (prediction == _pos)
+            if (prediction == Position)
             {
                 prediction = null;
             }
 
-            _prediction = prediction;
-            UpdateLineRenderer();
-            photonView.RPC(nameof(RPCSyncPrediction), RpcTarget.Others, prediction);
+            photonView.RPC(nameof(RPCSyncPrediction), RpcTarget.All, prediction);
         }
+    }
+
+    public void ResetPrediction()
+    {
+        SetPrediction(transform.position);
     }
 
     [PunRPC]
     private void RPCSyncPrediction(BoardPosition? prediction)
     {
-        _prediction = prediction;
+        Prediction = prediction;
         UpdateLineRenderer();
+    }
+
+    public void Die()
+    {
+        photonView.RPC(nameof(RPCSyncIsDead), RpcTarget.All, true);
+    }
+
+    [PunRPC]
+    private void RPCSyncIsDead(bool isDead)
+    {
+        IsDead = isDead;
     }
 
     void UpdateLineRenderer()
     {
-        if (_move != null && IsMine())
+        if (Move != null && IsMine())
         {
-            Vector3 pos = _pos.worldPosition;
-            Vector3 move = ((BoardPosition)_move).worldPosition;
+            Vector3 pos = Position.worldPosition;
+            Vector3 move = ((BoardPosition)Move).worldPosition;
             pos.y = move.y = 0.2f;
             _lineRenderer.SetPositions(new[] { pos, move });
         }
-        else if (_prediction != null && !IsMine())
+        else if (Prediction != null && !IsMine())
         {
-            Vector3 pos = _pos.worldPosition;
-            Vector3 prediction = ((BoardPosition)_prediction).worldPosition;
+            Vector3 pos = Position.worldPosition;
+            Vector3 prediction = ((BoardPosition)Prediction).worldPosition;
             pos.y = prediction.y = 0.2f;
             _lineRenderer.SetPositions(new[] { pos, prediction });
         }
