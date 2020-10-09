@@ -1,4 +1,4 @@
-﻿using Photon.Pun;
+using Photon.Pun;
 using UnityEngine;
 
 public class Piece : MonoBehaviourPun
@@ -26,7 +26,7 @@ public class Piece : MonoBehaviourPun
             }
             if (Move == Prediction)
             {
-                power -= 1; // Remove one power when correctly predicted, the opponent predicted your move, so you're weaker
+                power -= 2; // Remove one power when correctly predicted, the opponent predicted your move, so you're weaker
             }
             return power;
         }
