@@ -61,4 +61,9 @@ public struct BoardPosition
     {
         return new BoardPosition(this.x + x, this.y + y);
     }
+
+    public int ManhattenDistanceTo(BoardPosition other)
+    {
+        return Mathf.Abs(x - other.x) + Mathf.Abs(y - other.y);
+    }
 }
