@@ -25,8 +25,21 @@ public class Player : MonoBehaviourPun
     public ChessColor Color => _color;
 
     [SerializeField]
-    Toggle _isDoneToggle;
-    bool _isDone = false;
+    Toggle _imDoneToggle;
+    [SerializeField]
+    Toggle _globalIsDoneToggle;
+
+    bool _isDoneX = false;
+    bool IsDone
+    {
+        get => _isDoneX;
+        set
+        {
+            _isDoneX = value;
+            _globalIsDoneToggle.isOn = value;
+            if (IsMe()) _imDoneToggle.isOn = value;
+        }
+    }
 
     public static Player LocalPlayer { get; private set; }
     public static Player RemotePlayer { get; private set; }
@@ -36,8 +49,7 @@ public class Player : MonoBehaviourPun
 
     void Awake()
     {
-        Assert.IsNotNull(_isDoneToggle);
-        Assert.AreEqual(_isDone, _isDoneToggle.isOn);
+        IsDone = _isDoneX; // To update the toggles
 
         if (IsMe())
         {
@@ -57,7 +69,7 @@ public class Player : MonoBehaviourPun
     // Update is called once per frame
     void Update()
     {
-        if (!_isDone)
+        if (!IsDone)
         {
             if (Input.GetMouseButtonDown(0))
             {
@@ -95,10 +107,9 @@ public class Player : MonoBehaviourPun
 
     private void HandleIsDone(bool isDone)
     {
-        _isDone = isDone;
-        _isDoneToggle.isOn = isDone;
+        IsDone = isDone;
 
-        if (_isDone && OtherPlayer._isDone)
+        if (IsDone && OtherPlayer.IsDone)
         {
             GameManager.Instance.ResolveBattle();
         }
