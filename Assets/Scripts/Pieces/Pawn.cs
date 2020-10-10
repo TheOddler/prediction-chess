@@ -12,14 +12,14 @@ public class Pawn : Piece
         if (Others.AtPosition(normalMove) == null)
         {
             legalDestinations.Add(normalMove);
-        }
 
-        // Double move
-        BoardPosition doubleMove = Position.Add(0, dir * 2);
-        bool doubleMoveAllowed = (Color == ChessColor.White && Position.y == 1) || (Color == ChessColor.Black && Position.y == 6);
-        if (doubleMoveAllowed && Others.AtPosition(doubleMove) == null)
-        {
-            legalDestinations.Add(doubleMove);
+            // Double move
+            BoardPosition doubleMove = Position.Add(0, dir * 2);
+            bool doubleMoveAllowed = (Color == ChessColor.White && Position.y == 1) || (Color == ChessColor.Black && Position.y == 6);
+            if (doubleMoveAllowed && Others.AtPosition(doubleMove) == null)
+            {
+                legalDestinations.Add(doubleMove);
+            }
         }
 
         // Attack
