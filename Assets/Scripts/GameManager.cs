@@ -35,7 +35,7 @@ public class GameManager : MonoBehaviourPunCallbacks
         {
             Debug.Log("ResolveBattle()");
 
-            var pieces = Piece.AllPieces.ToArray();
+            var pieces = Piece.All.ToArray();
             int nbPieces = pieces.Length;
 
             for (int i = 0; i < pieces.Length - 1; ++i)

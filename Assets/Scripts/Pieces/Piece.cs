@@ -3,7 +3,7 @@ using System.Linq;
 using Photon.Pun;
 using UnityEngine;
 
-public class Piece : MonoBehaviourPun
+public abstract class Piece : MonoBehaviourPun
 {
     [SerializeField]
     ChessColor _color;
@@ -34,10 +34,10 @@ public class Piece : MonoBehaviourPun
         }
     }
 
-    public static IEnumerable<Piece> AllPieces => FindObjectsOfType<Piece>().Where(p => !p.IsDead);
-    public IEnumerable<Piece> OtherPieces => AllPieces.Where(p => p != this);
-    public IEnumerable<Piece> Friends => OtherPieces.OfColor(Color);
-    public IEnumerable<Piece> Enemies => OtherPieces.OfColor(Color.Invert());
+    public static IEnumerable<Piece> All => FindObjectsOfType<Piece>().Where(p => !p.IsDead);
+    public IEnumerable<Piece> Others => All.Where(p => p != this);
+    public IEnumerable<Piece> Friends => Others.OfColor(Color);
+    public IEnumerable<Piece> Enemies => Others.OfColor(Color.Invert());
 
     void Awake()
     {
@@ -210,7 +210,7 @@ public class Piece : MonoBehaviourPun
 
         BoardPosition move = (BoardPosition)Move;
         bool destinationOk = DestinationIsLegal(move);
-        return destinationOk && !OtherPieces.AnyMovingTo(move);
+        return destinationOk && !Friends.AnyMovingTo(move);
     }
 
     public virtual bool PredictionIsLegal()
@@ -224,8 +224,5 @@ public class Piece : MonoBehaviourPun
         return CalculateLegalDestinations().Contains(destination);
     }
 
-    public virtual HashSet<BoardPosition> CalculateLegalDestinations()
-    {
-        return new HashSet<BoardPosition>();
-    }
+    public abstract HashSet<BoardPosition> CalculateLegalDestinations();
 }

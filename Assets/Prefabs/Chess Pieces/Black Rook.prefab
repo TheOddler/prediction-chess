@@ -77,6 +77,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Black Rook
       objectReference: {fileID: 0}
+    - target: {fileID: 5004042170834625721, guid: 38ec80978605a584b887f52d47964c52,
+        type: 3}
+      propertyPath: _color
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6254165327125319057, guid: 38ec80978605a584b887f52d47964c52,
         type: 3}
       propertyPath: _color

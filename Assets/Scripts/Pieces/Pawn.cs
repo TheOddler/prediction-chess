@@ -9,14 +9,15 @@ public class Pawn : Piece
 
         // Move
         BoardPosition normalMove = Position.Add(0, dir);
-        if (Friends.AtPosition(normalMove) == null)
+        if (Others.AtPosition(normalMove) == null)
         {
             legalMoves.Add(normalMove);
         }
 
         // Double move
         BoardPosition doubleMove = Position.Add(0, dir * 2);
-        if ((Color == ChessColor.White && Position.y == 1 || Color == ChessColor.Black && Position.y == 6) && Friends.AtPosition(doubleMove) == null)
+        bool doubleMoveAllowed = (Color == ChessColor.White && Position.y == 1) || (Color == ChessColor.Black && Position.y == 6);
+        if (doubleMoveAllowed && Others.AtPosition(doubleMove) == null)
         {
             legalMoves.Add(doubleMove);
         }
