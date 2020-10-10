@@ -105,10 +105,6 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     private bool PiecesWillSwapPosition(Piece first, Piece second)
     {
-        if (first.Move != null && second.Move != null)
-        {
-            Debug.Log($"{first.Move} == {second.Position} ({first.Move == second.Position}) && {second.Move} == {first.Position} ({second.Move == first.Position})");
-        }
         return first.Move == second.Position && second.Move == first.Position;
     }
 }
