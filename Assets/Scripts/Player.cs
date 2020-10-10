@@ -3,6 +3,8 @@ using Photon.Pun;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Assertions;
+using System.Collections.Generic;
+using System.Linq;
 
 [RequireComponent(typeof(Camera))]
 [RequireComponent(typeof(AudioListener))]
@@ -19,6 +21,8 @@ public class Player : MonoBehaviourPun
             this.piece = piece;
         }
     }
+
+    const int MAX_MOVES = 3;
 
     [SerializeField]
     ChessColor _color;
@@ -44,6 +48,10 @@ public class Player : MonoBehaviourPun
     public static Player LocalPlayer { get; private set; }
     public static Player RemotePlayer { get; private set; }
     public Player OtherPlayer => LocalPlayer == this ? RemotePlayer : LocalPlayer;
+
+    public IEnumerable<Piece> Pieces => Piece.All.OfColor(Color);
+
+    public bool TurnIsLegal => Pieces.Count(p => p.Move != null) <= MAX_MOVES && Pieces.All(p => p.MoveIsLegal());
 
     Piece _selected;
 
@@ -101,6 +109,8 @@ public class Player : MonoBehaviourPun
 
     public void SetIsDone(bool isDone)
     {
+        isDone = isDone && TurnIsLegal;
+
         HandleIsDone(isDone);
         photonView.RPC(nameof(RPCSyncIsDone), RpcTarget.Others, isDone);
     }
