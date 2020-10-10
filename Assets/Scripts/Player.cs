@@ -109,7 +109,7 @@ public class Player : MonoBehaviourPun
     {
         IsDone = isDone;
 
-        if (IsDone && OtherPlayer.IsDone)
+        if (IsDone && (OtherPlayer.IsDone || PhotonNetwork.OfflineMode))
         {
             GameManager.Instance.ResolveBattle();
         }
