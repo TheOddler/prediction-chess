@@ -23,6 +23,7 @@ public class Player : MonoBehaviourPun
     }
 
     const int MAX_MOVES = 3;
+    const int MAX_PREDICTIONS = 3;
 
     [SerializeField]
     ChessColor _color;
@@ -51,7 +52,10 @@ public class Player : MonoBehaviourPun
 
     public IEnumerable<Piece> Pieces => Piece.All.OfColor(Color);
 
-    public bool TurnIsLegal => Pieces.Count(p => p.Move != null) <= MAX_MOVES && Pieces.All(p => p.MoveIsLegal());
+    public bool TurnIsLegal =>
+        Pieces.Count(p => p.Move != null) <= MAX_MOVES
+        && OtherPlayer.Pieces.Count(p => p.Prediction != null) <= MAX_PREDICTIONS
+        && Pieces.All(p => p.MoveIsLegal());
 
     Piece _selected;
 
