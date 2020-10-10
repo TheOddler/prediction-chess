@@ -48,14 +48,14 @@ public class GameManager : MonoBehaviourPunCallbacks
                     // Do fighting if needed
                     if (PiecesWillEndInSamePosition(first, second, out var fightBoardPosition))
                     {
-                        Fight(first, second, fightBoardPosition.worldPosition);
+                        Fight(first, second, fightBoardPosition.worldPosition, false);
                     }
 
                     if (PiecesWillSwapPosition(first, second))
                     {
                         if (first.Move == first.Prediction || second.Move == second.Prediction)
                         {
-                            Fight(first, second, (first.Position.worldPosition + second.Position.worldPosition) / 2);
+                            Fight(first, second, (first.Position.worldPosition + second.Position.worldPosition) / 2, true);
                         }
                     }
                 }
@@ -77,20 +77,20 @@ public class GameManager : MonoBehaviourPunCallbacks
         }
     }
 
-    private void Fight(Piece first, Piece second, Vector3 fightPosition)
+    private void Fight(Piece first, Piece second, Vector3 fightPosition, bool fightingHalfway)
     {
         if (first.Power == second.Power)
         {
-            first.Die(fightPosition);
-            second.Die(fightPosition);
+            first.Die(fightPosition, fightingHalfway);
+            second.Die(fightPosition, fightingHalfway);
         }
         else if (first.Power > second.Power)
         {
-            second.Die(fightPosition);
+            second.Die(fightPosition, fightingHalfway);
         }
         else
         {
-            first.Die(fightPosition);
+            first.Die(fightPosition, fightingHalfway);
         }
     }
 

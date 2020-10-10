@@ -6,7 +6,7 @@ using UnityEngine.Assertions;
 
 public abstract class Piece : MonoBehaviourPun
 {
-    const float ANIM_MOVE_TIME = 1;
+    const float ANIM_MOVE_TIME = 1.0f;
     const float ANIM_DIE_TIME = 0.5f;
 
     [SerializeField]
@@ -22,6 +22,7 @@ public abstract class Piece : MonoBehaviourPun
     Vector3 _positionBeforeDeath;
     Vector3 _positionToDieAt;
     float _timeOfDeath;
+    bool _diedHalfway;
     public bool IsDead { get; protected set; } = false;
 
     LineRenderer _lineRenderer;
@@ -66,13 +67,14 @@ public abstract class Piece : MonoBehaviourPun
         if (IsDead)
         {
             float timeSinceDeath = Time.time - _timeOfDeath;
-            if (timeSinceDeath < ANIM_MOVE_TIME)
+            float animMoveTime = ANIM_MOVE_TIME / (_diedHalfway ? 2f : 1f);
+            if (timeSinceDeath < animMoveTime)
             {
-                transform.position = Vector3.Lerp(_positionBeforeDeath, _positionToDieAt, timeSinceDeath / ANIM_MOVE_TIME);
+                transform.position = Vector3.Lerp(_positionBeforeDeath, _positionToDieAt, timeSinceDeath / animMoveTime);
             }
-            else if (timeSinceDeath < ANIM_MOVE_TIME + ANIM_DIE_TIME)
+            else if (timeSinceDeath < animMoveTime + ANIM_DIE_TIME)
             {
-                float scale = (ANIM_MOVE_TIME + ANIM_DIE_TIME - timeSinceDeath) / ANIM_DIE_TIME;
+                float scale = (animMoveTime + ANIM_DIE_TIME - timeSinceDeath) / ANIM_DIE_TIME;
                 float blobScale = 2 - scale * scale;
                 transform.position = _positionToDieAt;
                 transform.localScale = new Vector3(blobScale, scale, blobScale);
@@ -195,17 +197,18 @@ public abstract class Piece : MonoBehaviourPun
         UpdateLineRenderer();
     }
 
-    public void Die(Vector3 positionToDieAt)
+    public void Die(Vector3 positionToDieAt, bool diedHalfway)
     {
-        photonView.RPC(nameof(RPCDie), RpcTarget.All, positionToDieAt);
+        photonView.RPC(nameof(RPCDie), RpcTarget.All, positionToDieAt, diedHalfway);
     }
 
     [PunRPC]
-    protected void RPCDie(Vector3 positionToDieAt)
+    protected void RPCDie(Vector3 positionToDieAt, bool diedHalfway)
     {
         _timeOfDeath = Time.time;
         _positionBeforeDeath = transform.position;
         _positionToDieAt = positionToDieAt;
+        _diedHalfway = diedHalfway;
         IsDead = true;
     }
 
