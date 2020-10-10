@@ -2,6 +2,7 @@
 using System.Linq;
 using Photon.Pun;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 public abstract class Piece : MonoBehaviourPun
 {
@@ -225,4 +226,28 @@ public abstract class Piece : MonoBehaviourPun
     }
 
     public abstract HashSet<BoardPosition> CalculateLegalDestinations();
+
+    protected HashSet<BoardPosition> CalculateLegalDestinationsInDirection(int x, int y, int maxDistance = int.MaxValue)
+    {
+        Assert.IsTrue(x.In(0, 1, -1));
+        Assert.IsTrue(y.In(0, 1, -1));
+
+        var legalDestinations = new HashSet<BoardPosition>();
+
+        BoardPosition checking = Position.Add(x, y);
+        for (int i = 0; i < maxDistance; ++i)
+        {
+            if (Friends.AtPosition(checking) == null) legalDestinations.Add(checking);
+            else break;
+
+            if (Enemies.AtPosition(checking) != null) break;
+
+            var prev = checking;
+            checking = prev.Add(x, y);
+
+            if (prev == checking) break;
+        }
+
+        return legalDestinations;
+    }
 }
