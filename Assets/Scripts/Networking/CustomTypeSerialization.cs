@@ -11,12 +11,14 @@ public static class CustomTypeSerialization
 
     public static object DeserializeBoardPosition(byte[] data)
     {
-        return new BoardPosition(data[0], data[1]);
+        int x = data[0];
+        int y = data[1];
+        return new BoardPosition(x, y);
     }
 
     public static byte[] SerializeBoardPosition(object customType)
     {
         var c = (BoardPosition)customType;
-        return new byte[] { c.x, c.y };
+        return new byte[] { (byte)c.x, (byte)c.y };
     }
 }

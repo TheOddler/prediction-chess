@@ -3,6 +3,7 @@ using Photon.Pun;
 using UnityEngine.SceneManagement;
 using UnityEngine.Assertions;
 using System.Linq;
+using System.Collections.Generic;
 
 public class GameManager : MonoBehaviourPunCallbacks
 {
@@ -34,7 +35,7 @@ public class GameManager : MonoBehaviourPunCallbacks
         {
             Debug.Log("ResolveBattle()");
 
-            var pieces = FindObjectsOfType<Piece>().Where(p => !p.IsDead).ToArray();
+            var pieces = Piece.AllPieces.ToArray();
             int nbPieces = pieces.Length;
 
             for (int i = 0; i < pieces.Length - 1; ++i)
@@ -45,12 +46,12 @@ public class GameManager : MonoBehaviourPunCallbacks
                     Piece second = pieces[j];
 
                     // Do fighting if needed
-                    if (PiecesEndInSamePosition(first, second))
+                    if (PiecesWillEndInSamePosition(first, second))
                     {
                         Fight(first, second);
                     }
 
-                    if (PiecesSwapPosition(first, second))
+                    if (PiecesWillSwapPosition(first, second))
                     {
                         if (first.Move == first.Prediction || second.Move == second.Prediction)
                         {
@@ -93,7 +94,7 @@ public class GameManager : MonoBehaviourPunCallbacks
         }
     }
 
-    private bool PiecesEndInSamePosition(Piece first, Piece second)
+    private bool PiecesWillEndInSamePosition(Piece first, Piece second)
     {
         // They should fight if they end up in the same position
         BoardPosition finalPositionFirst = first.Move ?? first.Position;
@@ -101,7 +102,7 @@ public class GameManager : MonoBehaviourPunCallbacks
         return finalPositionFirst == finalPositionSecond;
     }
 
-    private bool PiecesSwapPosition(Piece first, Piece second)
+    private bool PiecesWillSwapPosition(Piece first, Piece second)
     {
         if (first.Move != null && second.Move != null)
         {

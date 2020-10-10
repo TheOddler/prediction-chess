@@ -1,3 +1,5 @@
+﻿using System.Collections.Generic;
+using System.Linq;
 using Photon.Pun;
 using UnityEngine;
 
@@ -7,11 +9,11 @@ public class Piece : MonoBehaviourPun
     ChessColor _color;
     public ChessColor Color => _color;
 
-    public BoardPosition Position { get; private set; }
-    public BoardPosition? Move { get; private set; } = null;
-    public BoardPosition? Prediction { get; private set; } = null;
+    public BoardPosition Position { get; protected set; }
+    public BoardPosition? Move { get; protected set; } = null;
+    public BoardPosition? Prediction { get; protected set; } = null;
 
-    public bool IsDead { get; private set; } = false;
+    public bool IsDead { get; protected set; } = false;
 
     LineRenderer _lineRenderer;
 
@@ -31,6 +33,11 @@ public class Piece : MonoBehaviourPun
             return power;
         }
     }
+
+    public static IEnumerable<Piece> AllPieces => FindObjectsOfType<Piece>().Where(p => !p.IsDead);
+    public IEnumerable<Piece> OtherPieces => AllPieces.Where(p => p != this);
+    public IEnumerable<Piece> Friends => OtherPieces.OfColor(Color);
+    public IEnumerable<Piece> Enemies => OtherPieces.OfColor(Color.Invert());
 
     void Awake()
     {
@@ -67,7 +74,7 @@ public class Piece : MonoBehaviourPun
     }
 
     [PunRPC]
-    private void RPCSyncPos(BoardPosition pos)
+    protected void RPCSyncPos(BoardPosition pos)
     {
         transform.position = pos.worldPosition;
         Position = pos;
@@ -89,15 +96,8 @@ public class Piece : MonoBehaviourPun
     public void SetMove(Vector3 worldPos)
     {
         BoardPosition? move = new BoardPosition(worldPos);
-        if (move != Move)
-        {
-            if (move == Position)
-            {
-                move = null;
-            }
-
-            photonView.RPC(nameof(RPCSyncMove), RpcTarget.All, move);
-        }
+        if (move == Position) move = null;
+        if (move != Move) photonView.RPC(nameof(RPCSyncMove), RpcTarget.All, move);
     }
 
     public void ResetMove()
@@ -106,24 +106,36 @@ public class Piece : MonoBehaviourPun
     }
 
     [PunRPC]
-    private void RPCSyncMove(BoardPosition? move)
+    protected void RPCSyncMove(BoardPosition? move)
     {
+        var prevMove = Move;
         Move = move;
+
+        if (prevMove != null)
+        {
+            foreach (var friend in Friends.MovingTo((BoardPosition)prevMove))
+            {
+                friend.UpdateLineRenderer();
+            }
+        }
+
         UpdateLineRenderer();
+
+        if (move != null)
+        {
+            var friends = Friends.MovingTo((BoardPosition)move);
+            foreach (var friend in friends)
+            {
+                friend.UpdateLineRenderer();
+            }
+        }
     }
 
     public void SetPrediction(Vector3 worldPos)
     {
         BoardPosition? prediction = new BoardPosition(worldPos);
-        if (prediction != Prediction)
-        {
-            if (prediction == Position)
-            {
-                prediction = null;
-            }
-
-            photonView.RPC(nameof(RPCSyncPrediction), RpcTarget.All, prediction);
-        }
+        if (prediction == Position) prediction = null;
+        if (prediction != Prediction) photonView.RPC(nameof(RPCSyncPrediction), RpcTarget.All, prediction);
     }
 
     public void ResetPrediction()
@@ -132,7 +144,7 @@ public class Piece : MonoBehaviourPun
     }
 
     [PunRPC]
-    private void RPCSyncPrediction(BoardPosition? prediction)
+    protected void RPCSyncPrediction(BoardPosition? prediction)
     {
         Prediction = prediction;
         UpdateLineRenderer();
@@ -144,7 +156,7 @@ public class Piece : MonoBehaviourPun
     }
 
     [PunRPC]
-    private void RPCSyncIsDead(bool isDead)
+    protected void RPCSyncIsDead(bool isDead)
     {
         IsDead = isDead;
     }
@@ -157,6 +169,16 @@ public class Piece : MonoBehaviourPun
             Vector3 move = ((BoardPosition)Move).worldPosition;
             pos.y = move.y = 0.2f;
             _lineRenderer.SetPositions(new[] { pos, move });
+
+            _lineRenderer.startColor = UnityEngine.Color.clear;
+            if (MoveIsLegal())
+            {
+                _lineRenderer.endColor = UnityEngine.Color.green;
+            }
+            else
+            {
+                _lineRenderer.endColor = UnityEngine.Color.red;
+            }
         }
         else if (Prediction != null && !IsMine())
         {
@@ -164,11 +186,46 @@ public class Piece : MonoBehaviourPun
             Vector3 prediction = ((BoardPosition)Prediction).worldPosition;
             pos.y = prediction.y = 0.2f;
             _lineRenderer.SetPositions(new[] { pos, prediction });
+
+            _lineRenderer.startColor = UnityEngine.Color.clear;
+            if (PredictionIsLegal())
+            {
+                _lineRenderer.endColor = UnityEngine.Color.green;
+            }
+            else
+            {
+                _lineRenderer.endColor = UnityEngine.Color.red;
+            }
         }
         else
         {
             var hidden = new Vector3(0, -1, 0);
             _lineRenderer.SetPositions(new[] { hidden, hidden });
         }
+    }
+
+    public virtual bool MoveIsLegal()
+    {
+        if (Move == null) return true;
+
+        BoardPosition move = (BoardPosition)Move;
+        bool destinationOk = DestinationIsLegal(move);
+        return destinationOk && !OtherPieces.AnyMovingTo(move);
+    }
+
+    public virtual bool PredictionIsLegal()
+    {
+        if (Prediction == null) return true;
+        return DestinationIsLegal((BoardPosition)Prediction);
+    }
+
+    protected virtual bool DestinationIsLegal(BoardPosition destination)
+    {
+        return CalculateLegalDestinations().Contains(destination);
+    }
+
+    public virtual HashSet<BoardPosition> CalculateLegalDestinations()
+    {
+        return new HashSet<BoardPosition>();
     }
 }
