@@ -52,10 +52,20 @@ public class Player : MonoBehaviourPun
 
     public IEnumerable<Piece> Pieces => Piece.All.OfColor(Color);
 
-    public bool TurnIsLegal =>
-        Pieces.Count(p => p.Move != null) <= MAX_MOVES
-        && OtherPlayer.Pieces.Count(p => p.Prediction != null) <= MAX_PREDICTIONS
-        && Pieces.All(p => p.MoveIsLegal());
+    public bool TurnIsLegal
+    {
+        get
+        {
+            bool moveCountOk = Pieces.Count(p => p.Move != null) <= MAX_MOVES;
+            bool predictionCountOk = OtherPlayer.Pieces.Count(p => p.Prediction != null) <= MAX_PREDICTIONS;
+            bool movesAllLegal = Pieces.All(p => p.MoveIsLegal());
+            if (!(moveCountOk && predictionCountOk && movesAllLegal))
+            {
+                Debug.Log($"moveCountOk {moveCountOk} && predictionCountOk {predictionCountOk} && movesAllLegal {movesAllLegal}");
+            }
+            return moveCountOk && predictionCountOk && movesAllLegal;
+        }
+    }
 
     Piece _selected;
 
