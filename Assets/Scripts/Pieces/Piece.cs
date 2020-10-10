@@ -44,7 +44,8 @@ public abstract class Piece : MonoBehaviourPun
         }
     }
 
-    public static IEnumerable<Piece> All => FindObjectsOfType<Piece>().Where(p => !p.IsDead);
+    public static IEnumerable<Piece> AllAndDying => FindObjectsOfType<Piece>();
+    public static IEnumerable<Piece> All => AllAndDying.Where(p => !p.IsDead);
     public IEnumerable<Piece> Others => All.Where(p => p != this);
     public IEnumerable<Piece> Friends => Others.OfColor(Color);
     public IEnumerable<Piece> Enemies => Others.OfColor(Color.Invert());
@@ -134,18 +135,18 @@ public abstract class Piece : MonoBehaviourPun
 
     public void SetMove(Vector3 worldPos)
     {
-        BoardPosition? move = new BoardPosition(worldPos);
+        SetMove(new BoardPosition(worldPos));
+    }
+
+    public void SetMove(BoardPosition? move)
+    {
         if (move == Position) move = null;
         if (move != Move) photonView.RPC(nameof(RPCSyncMove), RpcTarget.All, move);
     }
 
     public void ResetMove()
     {
-        if (Move != null)
-        {
-            var move = (BoardPosition)Move;
-            SetMove(move.worldPosition);
-        }
+        SetMove(null);
     }
 
     [PunRPC]
@@ -176,18 +177,18 @@ public abstract class Piece : MonoBehaviourPun
 
     public void SetPrediction(Vector3 worldPos)
     {
-        BoardPosition? prediction = new BoardPosition(worldPos);
+        SetPrediction(new BoardPosition(worldPos));
+    }
+
+    public void SetPrediction(BoardPosition? prediction)
+    {
         if (prediction == Position) prediction = null;
         if (prediction != Prediction) photonView.RPC(nameof(RPCSyncPrediction), RpcTarget.All, prediction);
     }
 
     public void ResetPrediction()
     {
-        if (Prediction != null)
-        {
-            var prediction = (BoardPosition)Prediction;
-            SetMove(prediction.worldPosition);
-        }
+        SetPrediction(null);
     }
 
     [PunRPC]

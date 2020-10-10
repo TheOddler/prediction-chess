@@ -24,6 +24,11 @@ public class GameManager : MonoBehaviourPunCallbacks
         }
     }
 
+    void OnApplicationQuit()
+    {
+        PhotonNetwork.Disconnect();
+    }
+
     public override void OnLeftRoom()
     {
         SceneManager.LoadScene(0);
@@ -64,7 +69,7 @@ public class GameManager : MonoBehaviourPunCallbacks
             foreach (var piece in pieces)
             {
                 // Move the pieces
-                if (piece.Move != null) piece.SetPos((BoardPosition)piece.Move);
+                if (piece.Move != null && !piece.IsDead) piece.SetPos((BoardPosition)piece.Move);
 
                 // Reset
                 piece.ResetMove();
