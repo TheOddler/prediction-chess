@@ -121,7 +121,6 @@ public class Player : MonoBehaviourPun
         else
         {
             Vector3 zeroPoint = ray.origin - ray.direction * ray.origin.y / ray.direction.y;
-            Debug.Log(zeroPoint);
             return new HitInfo(zeroPoint);
         }
     }
