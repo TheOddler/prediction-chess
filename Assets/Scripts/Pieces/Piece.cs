@@ -6,14 +6,22 @@ using UnityEngine.Assertions;
 
 public abstract class Piece : MonoBehaviourPun
 {
+    const float ANIM_MOVE_TIME = 1;
+    const float ANIM_DIE_TIME = 0.5f;
+
     [SerializeField]
     ChessColor _color;
     public ChessColor Color => _color;
 
     public BoardPosition Position { get; protected set; }
+    float _timeOfPositionChange;
+    Vector3 _worldPositionBeforePositionChange;
     public BoardPosition? Move { get; protected set; } = null;
     public BoardPosition? Prediction { get; protected set; } = null;
 
+    Vector3 _positionBeforeDeath;
+    Vector3 _positionToDieAt;
+    float _timeOfDeath;
     public bool IsDead { get; protected set; } = false;
 
     LineRenderer _lineRenderer;
@@ -57,7 +65,34 @@ public abstract class Piece : MonoBehaviourPun
     {
         if (IsDead)
         {
-            transform.Translate(0, -Time.deltaTime, 0);
+            float timeSinceDeath = Time.time - _timeOfDeath;
+            if (timeSinceDeath < ANIM_MOVE_TIME)
+            {
+                transform.position = Vector3.Lerp(_positionBeforeDeath, _positionToDieAt, timeSinceDeath / ANIM_MOVE_TIME);
+            }
+            else if (timeSinceDeath < ANIM_MOVE_TIME + ANIM_DIE_TIME)
+            {
+                float scale = (ANIM_MOVE_TIME + ANIM_DIE_TIME - timeSinceDeath) / ANIM_DIE_TIME;
+                float blobScale = 2 - scale * scale;
+                transform.position = _positionToDieAt;
+                transform.localScale = new Vector3(blobScale, scale, blobScale);
+            }
+            else
+            {
+                Destroy(gameObject);
+            }
+        }
+        else
+        {
+            float timeSinceMoveCommand = Time.time - _timeOfPositionChange;
+            if (timeSinceMoveCommand < ANIM_MOVE_TIME)
+            {
+                transform.position = Vector3.Lerp(_worldPositionBeforePositionChange, Position.worldPosition, timeSinceMoveCommand / ANIM_MOVE_TIME);
+            }
+            else
+            {
+                transform.position = Position.worldPosition;
+            }
         }
     }
 
@@ -77,7 +112,8 @@ public abstract class Piece : MonoBehaviourPun
     [PunRPC]
     protected void RPCSyncPos(BoardPosition pos)
     {
-        transform.position = pos.worldPosition;
+        _worldPositionBeforePositionChange = transform.position;
+        _timeOfPositionChange = Time.time;
         Position = pos;
         UpdateLineRenderer();
     }
@@ -103,7 +139,11 @@ public abstract class Piece : MonoBehaviourPun
 
     public void ResetMove()
     {
-        SetMove(transform.position);
+        if (Move != null)
+        {
+            var move = (BoardPosition)Move;
+            SetMove(move.worldPosition);
+        }
     }
 
     [PunRPC]
@@ -141,7 +181,11 @@ public abstract class Piece : MonoBehaviourPun
 
     public void ResetPrediction()
     {
-        SetPrediction(transform.position);
+        if (Prediction != null)
+        {
+            var prediction = (BoardPosition)Prediction;
+            SetMove(prediction.worldPosition);
+        }
     }
 
     [PunRPC]
@@ -151,15 +195,18 @@ public abstract class Piece : MonoBehaviourPun
         UpdateLineRenderer();
     }
 
-    public void Die()
+    public void Die(Vector3 positionToDieAt)
     {
-        photonView.RPC(nameof(RPCSyncIsDead), RpcTarget.All, true);
+        photonView.RPC(nameof(RPCDie), RpcTarget.All, positionToDieAt);
     }
 
     [PunRPC]
-    protected void RPCSyncIsDead(bool isDead)
+    protected void RPCDie(Vector3 positionToDieAt)
     {
-        IsDead = isDead;
+        _timeOfDeath = Time.time;
+        _positionBeforeDeath = transform.position;
+        _positionToDieAt = positionToDieAt;
+        IsDead = true;
     }
 
     void UpdateLineRenderer()

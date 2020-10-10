@@ -46,16 +46,16 @@ public class GameManager : MonoBehaviourPunCallbacks
                     Piece second = pieces[j];
 
                     // Do fighting if needed
-                    if (PiecesWillEndInSamePosition(first, second))
+                    if (PiecesWillEndInSamePosition(first, second, out var fightBoardPosition))
                     {
-                        Fight(first, second);
+                        Fight(first, second, fightBoardPosition.worldPosition);
                     }
 
                     if (PiecesWillSwapPosition(first, second))
                     {
                         if (first.Move == first.Prediction || second.Move == second.Prediction)
                         {
-                            Fight(first, second);
+                            Fight(first, second, (first.Position.worldPosition + second.Position.worldPosition) / 2);
                         }
                     }
                 }
@@ -77,28 +77,29 @@ public class GameManager : MonoBehaviourPunCallbacks
         }
     }
 
-    private void Fight(Piece first, Piece second)
+    private void Fight(Piece first, Piece second, Vector3 fightPosition)
     {
         if (first.Power == second.Power)
         {
-            first.Die();
-            second.Die();
+            first.Die(fightPosition);
+            second.Die(fightPosition);
         }
         else if (first.Power > second.Power)
         {
-            second.Die();
+            second.Die(fightPosition);
         }
         else
         {
-            first.Die();
+            first.Die(fightPosition);
         }
     }
 
-    private bool PiecesWillEndInSamePosition(Piece first, Piece second)
+    private bool PiecesWillEndInSamePosition(Piece first, Piece second, out BoardPosition finalPositon)
     {
         // They should fight if they end up in the same position
         BoardPosition finalPositionFirst = first.Move ?? first.Position;
         BoardPosition finalPositionSecond = second.Move ?? second.Position;
+        finalPositon = finalPositionFirst;
         return finalPositionFirst == finalPositionSecond;
     }
 
