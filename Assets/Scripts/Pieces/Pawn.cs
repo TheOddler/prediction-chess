@@ -16,6 +16,13 @@ public class Pawn : Piece
             legalMoves.Add(normalMove);
         }
 
+        // Double move
+        BoardPosition doubleMove = Position.Add(0, dir * 2);
+        if ((Color == ChessColor.White && Position.y == 1 || Color == ChessColor.Black && Position.y == 6) && others.AtPosition(doubleMove) == null)
+        {
+            legalMoves.Add(doubleMove);
+        }
+
         // Attack
         BoardPosition attack1 = Position.Add(1, dir);
         BoardPosition attack2 = Position.Add(-1, dir);
