@@ -36,7 +36,7 @@ public abstract class Piece : MonoBehaviourPun
             {
                 power += 1; // Add one power when moving, you prepared for battle since you were moving, so you're stronger
             }
-            if (Move == Prediction)
+            if (Prediction != null && Move == Prediction)
             {
                 power -= 2; // Remove one power when correctly predicted, the opponent predicted your move, so you're weaker
             }
