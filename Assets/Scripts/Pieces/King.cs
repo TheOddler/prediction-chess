@@ -4,6 +4,8 @@ public class King : Piece
 {
     const int MOVE_DISTANCE = 1;
 
+    public override int Power => -1000;
+
     public override HashSet<BoardPosition> CalculateLegalDestinations()
     {
         var top = CalculateLegalDestinationsInDirection(0, 1, MOVE_DISTANCE);

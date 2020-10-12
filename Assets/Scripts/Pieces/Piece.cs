@@ -27,7 +27,7 @@ public abstract class Piece : MonoBehaviourPun
 
     LineRenderer _lineRenderer;
 
-    public int Power
+    public virtual int Power
     {
         get
         {
