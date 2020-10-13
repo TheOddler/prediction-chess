@@ -121,21 +121,16 @@ public abstract class Piece : MonoBehaviourPun
         UpdateLineRenderer();
     }
 
-    public void SetMoveOrPrediction(Vector3 worldPos)
+    public void SetMoveOrPrediction(BoardPosition position)
     {
         if (IsMine())
         {
-            SetMove(worldPos);
+            SetMove(position);
         }
         else
         {
-            SetPrediction(worldPos);
+            SetPrediction(position);
         }
-    }
-
-    public void SetMove(Vector3 worldPos)
-    {
-        SetMove(new BoardPosition(worldPos));
     }
 
     public void SetMove(BoardPosition? move)
@@ -173,11 +168,6 @@ public abstract class Piece : MonoBehaviourPun
                 friend.UpdateLineRenderer();
             }
         }
-    }
-
-    public void SetPrediction(Vector3 worldPos)
-    {
-        SetPrediction(new BoardPosition(worldPos));
     }
 
     public void SetPrediction(BoardPosition? prediction)

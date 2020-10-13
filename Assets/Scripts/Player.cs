@@ -10,18 +10,6 @@ using System.Linq;
 [RequireComponent(typeof(AudioListener))]
 public class Player : MonoBehaviourPun
 {
-    struct HitInfo
-    {
-        public Vector3 position;
-        public Piece piece;
-
-        public HitInfo(Vector3 position, Piece piece = null)
-        {
-            this.position = position;
-            this.piece = piece;
-        }
-    }
-
     const int MAX_MOVES = 3;
     const int MAX_PREDICTIONS = 3;
 
@@ -95,13 +83,13 @@ public class Player : MonoBehaviourPun
         {
             if (Input.GetMouseButtonDown(0))
             {
-                var hit = GetHit();
-                _selected = hit.piece;
+                var position = GetMousePosition();
+                _selected = Piece.All.AtPosition(position);
             }
             else if (Input.GetMouseButton(0) && _selected != null)
             {
-                var hit = GetHit();
-                _selected.SetMoveOrPrediction(hit.position);
+                var position = GetMousePosition();
+                _selected.SetMoveOrPrediction(position);
             }
         }
     }
@@ -145,18 +133,10 @@ public class Player : MonoBehaviourPun
         HandleIsDone(isDone);
     }
 
-    HitInfo GetHit()
+    BoardPosition GetMousePosition()
     {
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        RaycastHit info;
-        if (Physics.Raycast(ray, out info))
-        {
-            return new HitInfo(info.point, info.transform.GetComponent<Piece>());
-        }
-        else
-        {
-            Vector3 zeroPoint = ray.origin - ray.direction * ray.origin.y / ray.direction.y;
-            return new HitInfo(zeroPoint);
-        }
+        Vector3 zeroPoint = ray.origin - ray.direction * ray.origin.y / ray.direction.y;
+        return new BoardPosition(zeroPoint);
     }
 }
