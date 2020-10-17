@@ -14,11 +14,42 @@ public abstract class Piece : MonoBehaviourPun
     ChessColor _color;
     public ChessColor Color => _color;
 
-    public BoardPosition Position { get; protected set; }
-    public BoardPosition? Move { get; protected set; } = null;
-    public BoardPosition? Prediction { get; protected set; } = null;
+    BoardPosition _position;
+    public BoardPosition Position
+    {
+        get => _position;
+        private set
+        {
+            _position = value;
+            UpdateLineRenderer();
+        }
+    }
 
-    public bool IsDead { get; protected set; } = false;
+    BoardPosition? _move = null;
+    public BoardPosition? Move
+    {
+        get => _move;
+        private set
+        {
+            var prev = _move;
+            _move = value;
+            UpdateOtherPiecesLinerenderersWhereNeeded(value, prev);
+            UpdateLineRenderer();
+        }
+    }
+
+    BoardPosition? _prediction = null;
+    public BoardPosition? Prediction
+    {
+        get => _prediction;
+        private set
+        {
+            _prediction = value;
+            UpdateLineRenderer();
+        }
+    }
+
+    public bool IsDead { get; private set; } = false;
 
     LineRenderer _lineRenderer;
 
@@ -47,22 +78,17 @@ public abstract class Piece : MonoBehaviourPun
 
     void Awake()
     {
-        Position = new BoardPosition(transform.position);
-        transform.position = Position.worldPosition;
-
         _lineRenderer = GetComponent<LineRenderer>();
+
+        var position = new BoardPosition(transform.position);
+        transform.position = position.worldPosition;
+        Position = position;
     }
 
-    void Start()
-    {
-        UpdateLineRenderer();
-    }
-
-    IEnumerator Animate(Vector3 movePosition, bool died, bool diedHalfway)
+    IEnumerator Animate(Vector3 startPosition, Vector3 movePosition, bool died, bool diedHalfway)
     {
         float startTime = Time.time;
         float moveAnimEndTime = startTime + ANIM_MOVE_TIME / (died && diedHalfway ? 2f : 1f);
-        Vector3 startPosition = Position.worldPosition;
 
         while (Time.time < moveAnimEndTime)
         {
@@ -108,9 +134,9 @@ public abstract class Piece : MonoBehaviourPun
     [PunRPC]
     protected void RPCSyncPos(BoardPosition pos)
     {
-        StartCoroutine(Animate(pos.worldPosition, false, false));
+        var prevPos = Position;
         Position = pos;
-        UpdateLineRenderer();
+        StartCoroutine(Animate(prevPos.worldPosition, pos.worldPosition, false, false));
     }
 
     public void SetMoveOrPrediction(BoardPosition? position)
@@ -127,8 +153,15 @@ public abstract class Piece : MonoBehaviourPun
 
     public void SetMove(BoardPosition? move)
     {
-        if (move == Position) move = null;
-        if (move != Move) photonView.RPC(nameof(RPCSyncMove), RpcTarget.All, move);
+        if (move == Position)
+        {
+            move = null;
+        }
+
+        if (move != Move)
+        {
+            photonView.RPC(nameof(RPCSyncMove), RpcTarget.All, move);
+        }
     }
 
     public void ResetMove()
@@ -139,33 +172,20 @@ public abstract class Piece : MonoBehaviourPun
     [PunRPC]
     protected void RPCSyncMove(BoardPosition? move)
     {
-        var prevMove = Move;
         Move = move;
-
-        if (prevMove != null)
-        {
-            foreach (var friend in Friends.MovingTo((BoardPosition)prevMove))
-            {
-                friend.UpdateLineRenderer();
-            }
-        }
-
-        UpdateLineRenderer();
-
-        if (move != null)
-        {
-            var friends = Friends.MovingTo((BoardPosition)move);
-            foreach (var friend in friends)
-            {
-                friend.UpdateLineRenderer();
-            }
-        }
     }
 
     public void SetPrediction(BoardPosition? prediction)
     {
-        if (prediction == Position) prediction = null;
-        if (prediction != Prediction) photonView.RPC(nameof(RPCSyncPrediction), RpcTarget.All, prediction);
+        if (prediction == Position)
+        {
+            prediction = null;
+        }
+
+        if (prediction != Prediction)
+        {
+            photonView.RPC(nameof(RPCSyncPrediction), RpcTarget.All, prediction);
+        }
     }
 
     public void ResetPrediction()
@@ -177,7 +197,6 @@ public abstract class Piece : MonoBehaviourPun
     protected void RPCSyncPrediction(BoardPosition? prediction)
     {
         Prediction = prediction;
-        UpdateLineRenderer();
     }
 
     public void Die(Vector3 positionToDieAt, bool diedHalfway)
@@ -189,7 +208,7 @@ public abstract class Piece : MonoBehaviourPun
     protected void RPCDie(Vector3 positionToDieAt, bool diedHalfway)
     {
         IsDead = true;
-        StartCoroutine(Animate(positionToDieAt, true, diedHalfway));
+        StartCoroutine(Animate(Position.worldPosition, positionToDieAt, true, diedHalfway));
     }
 
     void UpdateLineRenderer()
@@ -235,9 +254,32 @@ public abstract class Piece : MonoBehaviourPun
         }
     }
 
+    void UpdateOtherPiecesLinerenderersWhereNeeded(BoardPosition? move, BoardPosition? prevMove)
+    {
+        if (prevMove != null)
+        {
+            foreach (var friend in Friends.MovingTo((BoardPosition)prevMove))
+            {
+                friend.UpdateLineRenderer();
+            }
+        }
+
+        if (move != null)
+        {
+            var friends = Friends.MovingTo((BoardPosition)move);
+            foreach (var friend in friends)
+            {
+                friend.UpdateLineRenderer();
+            }
+        }
+    }
+
     public virtual bool MoveIsLegal()
     {
-        if (Move == null) return true;
+        if (Move == null)
+        {
+            return true;
+        }
 
         BoardPosition move = (BoardPosition)Move;
         bool destinationOk = DestinationIsLegal(move);
@@ -246,7 +288,11 @@ public abstract class Piece : MonoBehaviourPun
 
     public virtual bool PredictionIsLegal()
     {
-        if (Prediction == null) return true;
+        if (Prediction == null)
+        {
+            return true;
+        }
+
         return DestinationIsLegal((BoardPosition)Prediction);
     }
 
@@ -267,15 +313,27 @@ public abstract class Piece : MonoBehaviourPun
         BoardPosition checking = Position.Add(x, y);
         for (int i = 0; i < maxDistance; ++i)
         {
-            if (Friends.AtPosition(checking) == null) legalDestinations.Add(checking);
-            else break;
+            if (Friends.AtPosition(checking) == null)
+            {
+                legalDestinations.Add(checking);
+            }
+            else
+            {
+                break;
+            }
 
-            if (Enemies.AtPosition(checking) != null) break;
+            if (Enemies.AtPosition(checking) != null)
+            {
+                break;
+            }
 
             var prev = checking;
             checking = prev.Add(x, y);
 
-            if (prev == checking) break;
+            if (prev == checking)
+            {
+                break;
+            }
         }
 
         return legalDestinations;

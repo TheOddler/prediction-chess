@@ -31,6 +31,11 @@ public class Player : MonoBehaviourPun
             _isDoneX = value;
             _globalIsDoneToggle.isOn = value;
             if (IsMe()) _imDoneToggle.isOn = value;
+
+            if (IsDone && (OtherPlayer.IsDone || PhotonNetwork.OfflineMode))
+            {
+                GameManager.Instance.HandleBothPlayersDone();
+            }
         }
     }
 
@@ -44,16 +49,15 @@ public class Player : MonoBehaviourPun
     {
         get
         {
-            bool moveCountOk = Pieces.Count(p => p.Move != null) <= MAX_MOVES;
-            bool predictionCountOk = OtherPlayer.Pieces.Count(p => p.Prediction != null) <= MAX_PREDICTIONS;
-            bool movesAllLegal = Pieces.All(p => p.MoveIsLegal());
-            if (!(moveCountOk && predictionCountOk && movesAllLegal))
-            {
-                Debug.Log($"moveCountOk {moveCountOk} && predictionCountOk {predictionCountOk} && movesAllLegal {movesAllLegal}");
-            }
-            return moveCountOk && predictionCountOk && movesAllLegal;
+            return MoveCount <= MAX_MOVES
+                && PredictionCount <= MAX_PREDICTIONS
+                && AllMovesLegal;
         }
     }
+
+    public int MoveCount => Pieces.Count(p => p.Move != null);
+    public int PredictionCount => OtherPlayer.Pieces.Count(p => p.Prediction != null);
+    public bool AllMovesLegal => Pieces.All(p => p.MoveIsLegal());
 
     Piece _selected;
 
@@ -71,6 +75,7 @@ public class Player : MonoBehaviourPun
             Assert.IsNull(RemotePlayer);
             RemotePlayer = this;
         }
+
         enabled = IsMe();
         GetComponent<Camera>().enabled = enabled;
         GetComponent<AudioListener>().enabled = enabled;
@@ -113,24 +118,20 @@ public class Player : MonoBehaviourPun
     {
         isDone = isDone && TurnIsLegal;
 
-        HandleIsDone(isDone);
-        photonView.RPC(nameof(RPCSyncIsDone), RpcTarget.Others, isDone);
-    }
-
-    private void HandleIsDone(bool isDone)
-    {
-        IsDone = isDone;
-
-        if (IsDone && (OtherPlayer.IsDone || PhotonNetwork.OfflineMode))
+        if (isDone != IsDone)
         {
-            GameManager.Instance.ResolveBattle();
+            photonView.RPC(nameof(RPCSyncIsDone), RpcTarget.All, isDone);
+        }
+        else
+        {
+            IsDone = isDone; // To force correcting the ui toggle
         }
     }
 
     [PunRPC]
     private void RPCSyncIsDone(bool isDone)
     {
-        HandleIsDone(isDone);
+        IsDone = isDone;
     }
 
     BoardPosition? GetMousePosition()

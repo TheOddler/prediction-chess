@@ -34,52 +34,57 @@ public class GameManager : MonoBehaviourPunCallbacks
         SceneManager.LoadScene(0);
     }
 
-    public void ResolveBattle()
+    public void HandleBothPlayersDone()
     {
         if (PhotonNetwork.IsMasterClient)
         {
-            Debug.Log("ResolveBattle()");
+            ResolveBattle();
+        }
+    }
 
-            var pieces = Piece.All.ToArray();
-            int nbPieces = pieces.Length;
+    private void ResolveBattle()
+    {
+        Debug.Log("ResolveBattle()");
 
-            for (int i = 0; i < pieces.Length - 1; ++i)
+        var pieces = Piece.All.ToArray();
+        int nbPieces = pieces.Length;
+
+        for (int i = 0; i < pieces.Length - 1; ++i)
+        {
+            for (int j = i + 1; j < pieces.Length; ++j)
             {
-                for (int j = i + 1; j < pieces.Length; ++j)
+                Piece first = pieces[i];
+                Piece second = pieces[j];
+
+                // Do fighting if needed
+                if (PiecesWillEndInSamePosition(first, second, out var fightBoardPosition))
                 {
-                    Piece first = pieces[i];
-                    Piece second = pieces[j];
+                    Fight(first, second, fightBoardPosition.worldPosition, false);
+                }
 
-                    // Do fighting if needed
-                    if (PiecesWillEndInSamePosition(first, second, out var fightBoardPosition))
+                if (PiecesWillSwapPosition(first, second))
+                {
+                    if (first.Move == first.Prediction || second.Move == second.Prediction)
                     {
-                        Fight(first, second, fightBoardPosition.worldPosition, false);
-                    }
-
-                    if (PiecesWillSwapPosition(first, second))
-                    {
-                        if (first.Move == first.Prediction || second.Move == second.Prediction)
-                        {
-                            Fight(first, second, (first.Position.worldPosition + second.Position.worldPosition) / 2, true);
-                        }
+                        Fight(first, second, (first.Position.worldPosition + second.Position.worldPosition) / 2, true);
                     }
                 }
             }
-
-            foreach (var piece in pieces)
-            {
-                // Move the pieces
-                if (piece.Move != null && !piece.IsDead) piece.SetPos((BoardPosition)piece.Move);
-
-                // Reset
-                piece.ResetMove();
-                piece.ResetPrediction();
-            }
-
-            // Reset players
-            Player.LocalPlayer.SetIsDone(false);
-            Player.RemotePlayer.SetIsDone(false);
         }
+
+        foreach (var piece in pieces)
+        {
+            // Move the pieces
+            if (piece.Move != null && !piece.IsDead) piece.SetPos((BoardPosition)piece.Move);
+
+            // Reset
+            piece.ResetMove();
+            piece.ResetPrediction();
+        }
+
+        // Reset players
+        Player.LocalPlayer.SetIsDone(false);
+        Player.RemotePlayer.SetIsDone(false);
     }
 
     private void Fight(Piece first, Piece second, Vector3 fightPosition, bool fightingHalfway)
