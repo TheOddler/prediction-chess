@@ -3,7 +3,7 @@ using System.Linq;
 
 public static class PiecesExtensions
 {
-    public static Piece AtPosition(this IEnumerable<Piece> pieces, BoardPosition pos)
+    public static Piece AtPosition(this IEnumerable<Piece> pieces, BoardPosition? pos)
     {
         return pieces.SingleOrDefault(p => p.Position == pos);
     }

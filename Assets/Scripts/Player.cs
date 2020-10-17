@@ -133,10 +133,10 @@ public class Player : MonoBehaviourPun
         HandleIsDone(isDone);
     }
 
-    BoardPosition GetMousePosition()
+    BoardPosition? GetMousePosition()
     {
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         Vector3 zeroPoint = ray.origin - ray.direction * ray.origin.y / ray.direction.y;
-        return new BoardPosition(zeroPoint);
+        return BoardPosition.IfInBoard(zeroPoint);
     }
 }

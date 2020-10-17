@@ -22,6 +22,15 @@ public struct BoardPosition
     {
     }
 
+    public static BoardPosition? IfInBoard(Vector3 worldPosition)
+    {
+        int x = Mathf.RoundToInt(worldPosition.x + 3.5f);
+        int y = Mathf.RoundToInt(worldPosition.z + 3.5f);
+
+        if (x >= 0 && x <= 7 && y >= 0 && y <= 7) return new BoardPosition(x, y);
+        else return null;
+    }
+
     public override bool Equals(object obj)
     {
         if (obj is BoardPosition)
