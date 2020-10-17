@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using Photon.Pun;
 using UnityEngine;
@@ -14,15 +15,9 @@ public abstract class Piece : MonoBehaviourPun
     public ChessColor Color => _color;
 
     public BoardPosition Position { get; protected set; }
-    float _timeOfPositionChange;
-    Vector3 _worldPositionBeforePositionChange;
     public BoardPosition? Move { get; protected set; } = null;
     public BoardPosition? Prediction { get; protected set; } = null;
 
-    Vector3 _positionBeforeDeath;
-    Vector3 _positionToDieAt;
-    float _timeOfDeath;
-    bool _diedHalfway;
     public bool IsDead { get; protected set; } = false;
 
     LineRenderer _lineRenderer;
@@ -48,7 +43,7 @@ public abstract class Piece : MonoBehaviourPun
     public static IEnumerable<Piece> All => AllAndDying.Where(p => !p.IsDead);
     public IEnumerable<Piece> Others => All.Where(p => p != this);
     public IEnumerable<Piece> Friends => Others.OfColor(Color);
-    public IEnumerable<Piece> Enemies => Others.OfColor(Color.Invert());
+    public IEnumerable<Piece> Enemies => All.OfColor(Color.Invert());
 
     void Awake()
     {
@@ -63,39 +58,37 @@ public abstract class Piece : MonoBehaviourPun
         UpdateLineRenderer();
     }
 
-    void Update()
+    IEnumerator Animate(Vector3 movePosition, bool died, bool diedHalfway)
     {
-        if (IsDead)
+        float startTime = Time.time;
+        float moveAnimEndTime = startTime + ANIM_MOVE_TIME / (died && diedHalfway ? 2f : 1f);
+        Vector3 startPosition = Position.worldPosition;
+
+        while (Time.time < moveAnimEndTime)
         {
-            float timeSinceDeath = Time.time - _timeOfDeath;
-            float animMoveTime = ANIM_MOVE_TIME / (_diedHalfway ? 2f : 1f);
-            if (timeSinceDeath < animMoveTime)
-            {
-                transform.position = Vector3.Lerp(_positionBeforeDeath, _positionToDieAt, timeSinceDeath / animMoveTime);
-            }
-            else if (timeSinceDeath < animMoveTime + ANIM_DIE_TIME)
-            {
-                float scale = (animMoveTime + ANIM_DIE_TIME - timeSinceDeath) / ANIM_DIE_TIME;
-                float blobScale = 2 - scale * scale;
-                transform.position = _positionToDieAt;
-                transform.localScale = new Vector3(blobScale, scale, blobScale);
-            }
-            else
-            {
-                Destroy(gameObject);
-            }
+            float passedTime = Time.time - startTime;
+            transform.position = Vector3.Lerp(startPosition, movePosition, passedTime / ANIM_MOVE_TIME);
+
+            yield return null;
         }
-        else
+
+        transform.position = movePosition;
+
+        if (died)
         {
-            float timeSinceMoveCommand = Time.time - _timeOfPositionChange;
-            if (timeSinceMoveCommand < ANIM_MOVE_TIME)
+            float deathAnimEndTime = moveAnimEndTime + ANIM_DIE_TIME;
+            while (Time.time < deathAnimEndTime)
             {
-                transform.position = Vector3.Lerp(_worldPositionBeforePositionChange, Position.worldPosition, timeSinceMoveCommand / ANIM_MOVE_TIME);
+                float passedTime = Time.time - moveAnimEndTime;
+
+                float scale = 1 - (passedTime / ANIM_DIE_TIME);
+                float blobScale = 2 - scale * scale;
+                transform.localScale = new Vector3(blobScale, scale, blobScale);
+
+                yield return null;
             }
-            else
-            {
-                transform.position = Position.worldPosition;
-            }
+
+            Destroy(gameObject);
         }
     }
 
@@ -115,13 +108,12 @@ public abstract class Piece : MonoBehaviourPun
     [PunRPC]
     protected void RPCSyncPos(BoardPosition pos)
     {
-        _worldPositionBeforePositionChange = transform.position;
-        _timeOfPositionChange = Time.time;
+        StartCoroutine(Animate(pos.worldPosition, false, false));
         Position = pos;
         UpdateLineRenderer();
     }
 
-    public void SetMoveOrPrediction(BoardPosition position)
+    public void SetMoveOrPrediction(BoardPosition? position)
     {
         if (IsMine())
         {
@@ -196,11 +188,8 @@ public abstract class Piece : MonoBehaviourPun
     [PunRPC]
     protected void RPCDie(Vector3 positionToDieAt, bool diedHalfway)
     {
-        _timeOfDeath = Time.time;
-        _positionBeforeDeath = transform.position;
-        _positionToDieAt = positionToDieAt;
-        _diedHalfway = diedHalfway;
         IsDead = true;
+        StartCoroutine(Animate(positionToDieAt, true, diedHalfway));
     }
 
     void UpdateLineRenderer()
