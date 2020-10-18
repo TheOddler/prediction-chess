@@ -7,21 +7,27 @@ public class Knight : Piece
         var destinations = new HashSet<BoardPosition>();
 
         // Create possible destinations
-        destinations.Add(Position.Add(1, 2));
-        destinations.Add(Position.Add(-1, 2));
-        destinations.Add(Position.Add(1, -2));
-        destinations.Add(Position.Add(-1, -2));
-        destinations.Add(Position.Add(2, 1));
-        destinations.Add(Position.Add(-2, 1));
-        destinations.Add(Position.Add(2, -1));
-        destinations.Add(Position.Add(-2, -1));
-
-        // Remove those that ended up outside the board, and thus got their distance reduced
-        destinations.RemoveWhere(p => p.ManhattenDistanceTo(Position) != 3);
+        MaybeAddMove(1, 2, destinations);
+        MaybeAddMove(-1, 2, destinations);
+        MaybeAddMove(1, -2, destinations);
+        MaybeAddMove(-1, -2, destinations);
+        MaybeAddMove(2, 1, destinations);
+        MaybeAddMove(-2, 1, destinations);
+        MaybeAddMove(2, -1, destinations);
+        MaybeAddMove(-2, -1, destinations);
 
         // Remove those that end up on friends
         destinations.RemoveWhere(p => Friends.AtPosition(p) != null);
 
         return destinations;
+    }
+
+    private void MaybeAddMove(int x, int y, HashSet<BoardPosition> set)
+    {
+        var destination = Position.Add(x, y);
+        if (destination != null)
+        {
+            set.Add((BoardPosition)destination);
+        }
     }
 }

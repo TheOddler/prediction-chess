@@ -5,6 +5,7 @@ public static class PiecesExtensions
 {
     public static Piece AtPosition(this IEnumerable<Piece> pieces, BoardPosition? pos)
     {
+        if (pos == null) return null;
         return pieces.SingleOrDefault(p => p.Position == pos);
     }
 

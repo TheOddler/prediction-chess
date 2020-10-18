@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Photon.Pun;
@@ -291,9 +291,10 @@ public abstract class Piece : MonoBehaviourPun
 
         var legalDestinations = new HashSet<BoardPosition>();
 
-        BoardPosition checking = Position.Add(x, y);
-        for (int i = 0; i < maxDistance; ++i)
+        BoardPosition? maybeNext = Position.Add(x, y);
+        for (int i = 0; i < maxDistance && maybeNext != null; ++i)
         {
+            BoardPosition checking = (BoardPosition)maybeNext;
             if (Friends.AtPosition(checking) == null)
             {
                 legalDestinations.Add(checking);
@@ -308,13 +309,7 @@ public abstract class Piece : MonoBehaviourPun
                 break;
             }
 
-            var prev = checking;
-            checking = prev.Add(x, y);
-
-            if (prev == checking)
-            {
-                break;
-            }
+            maybeNext = checking.Add(x, y);
         }
 
         return legalDestinations;
