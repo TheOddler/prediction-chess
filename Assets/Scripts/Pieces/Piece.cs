@@ -103,13 +103,14 @@ public abstract class Piece : MonoBehaviourPun
         if (died)
         {
             float deathAnimEndTime = moveAnimEndTime + ANIM_DIE_TIME;
+            float xScaleSign = Mathf.Sign(transform.localScale.x);
             while (Time.time < deathAnimEndTime)
             {
                 float passedTime = Time.time - moveAnimEndTime;
 
                 float scale = 1 - (passedTime / ANIM_DIE_TIME);
                 float blobScale = 2 - scale * scale;
-                transform.localScale = new Vector3(blobScale, scale, blobScale);
+                transform.localScale = new Vector3(blobScale * xScaleSign, scale, blobScale);
 
                 yield return null;
             }
