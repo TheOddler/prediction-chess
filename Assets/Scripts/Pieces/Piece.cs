@@ -9,6 +9,8 @@ public abstract class Piece : MonoBehaviourPun
 {
     const float ANIM_MOVE_TIME = 1.0f;
     const float ANIM_DIE_TIME = 0.5f;
+    const float DEATH_SIZE = 0.5f;
+    const float DEATH_OFFSET = 0.3f;
 
     [SerializeField]
     ChessColor _color;
@@ -109,9 +111,9 @@ public abstract class Piece : MonoBehaviourPun
                 float passedTime = Time.time - moveAnimEndTime;
                 float progress = passedTime / ANIM_DIE_TIME;
 
-                float scale = 1 - progress * 0.5f;
+                float scale = 1 - progress * (1 - DEATH_SIZE);
                 transform.localScale = new Vector3(scale * xScaleSign, scale, scale);
-                transform.position = Vector3.Lerp(startPosition, movePosition + transform.right * 0.3f, progress);
+                transform.position = Vector3.Lerp(startPosition, movePosition + transform.right * DEATH_OFFSET, progress);
 
                 yield return null;
             }
