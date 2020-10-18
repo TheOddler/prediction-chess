@@ -139,19 +139,19 @@ public abstract class Piece : MonoBehaviourPun
         StartCoroutine(Animate(prevPos.worldPosition, pos.worldPosition, false, false));
     }
 
-    public void SetMoveOrPrediction(BoardPosition? position)
+    public bool SetMoveOrPrediction(BoardPosition? position)
     {
         if (IsMine())
         {
-            SetMove(position);
+            return SetMove(position);
         }
         else
         {
-            SetPrediction(position);
+            return SetPrediction(position);
         }
     }
 
-    public void SetMove(BoardPosition? move)
+    public bool SetMove(BoardPosition? move)
     {
         if (move == Position)
         {
@@ -161,7 +161,10 @@ public abstract class Piece : MonoBehaviourPun
         if (move != Move)
         {
             photonView.RPC(nameof(RPCSyncMove), RpcTarget.All, move);
+            return true;
         }
+
+        return false;
     }
 
     public void ResetMove()
@@ -175,7 +178,7 @@ public abstract class Piece : MonoBehaviourPun
         Move = move;
     }
 
-    public void SetPrediction(BoardPosition? prediction)
+    public bool SetPrediction(BoardPosition? prediction)
     {
         if (prediction == Position)
         {
@@ -185,7 +188,10 @@ public abstract class Piece : MonoBehaviourPun
         if (prediction != Prediction)
         {
             photonView.RPC(nameof(RPCSyncPrediction), RpcTarget.All, prediction);
+            return true;
         }
+
+        return false;
     }
 
     public void ResetPrediction()

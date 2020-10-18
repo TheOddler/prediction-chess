@@ -2,6 +2,7 @@
 using Photon.Pun;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 using UnityEngine.Assertions;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,6 +22,11 @@ public class Player : MonoBehaviourPun
     Toggle _imDoneToggle;
     [SerializeField]
     Toggle _globalIsDoneToggle;
+
+    [SerializeField]
+    TMP_Text _moveCountIndicator;
+    [SerializeField]
+    TMP_Text _predictionCountIndicator;
 
     bool _isDoneX = false;
     bool IsDone
@@ -44,27 +50,30 @@ public class Player : MonoBehaviourPun
     public Player OtherPlayer => LocalPlayer == this ? RemotePlayer : LocalPlayer;
 
     public IEnumerable<Piece> Pieces => Piece.All.OfColor(Color);
+    public IEnumerable<Piece> EnemyPieces => Piece.All.OfColor(Color.Invert());
 
     public bool TurnIsLegal
     {
         get
         {
-            return MoveCount <= MAX_MOVES
-                && PredictionCount <= MAX_PREDICTIONS
-                && AllMovesLegal;
+            return MoveCountOk
+                && PredictionCountOk
+                && AllMovesLegal
+                && AllPredictionsLegal;
         }
     }
 
     public int MoveCount => Pieces.Count(p => p.Move != null);
     public int PredictionCount => OtherPlayer.Pieces.Count(p => p.Prediction != null);
+    public bool MoveCountOk => MoveCount <= MAX_MOVES;
+    public bool PredictionCountOk => PredictionCount <= MAX_PREDICTIONS;
     public bool AllMovesLegal => Pieces.All(p => p.MoveIsLegal());
+    public bool AllPredictionsLegal => EnemyPieces.All(p => p.PredictionIsLegal());
 
     Piece _selected;
 
     void Awake()
     {
-        IsDone = _isDoneX; // To update the toggles
-
         if (IsMe())
         {
             Assert.IsNull(LocalPlayer);
@@ -81,6 +90,14 @@ public class Player : MonoBehaviourPun
         GetComponent<AudioListener>().enabled = enabled;
     }
 
+    void Start()
+    {
+        IsDone = _isDoneX; // To update the toggles
+
+        UpdateMoveCountIndicator();
+        UpdatePredictionCountIndicator();
+    }
+
     // Update is called once per frame
     void Update()
     {
@@ -94,7 +111,12 @@ public class Player : MonoBehaviourPun
             else if (Input.GetMouseButton(0) && _selected != null)
             {
                 var position = GetMousePosition();
-                _selected.SetMoveOrPrediction(position);
+                bool changed = _selected.SetMoveOrPrediction(position);
+                if (changed)
+                {
+                    UpdateMoveCountIndicator();
+                    UpdatePredictionCountIndicator();
+                }
             }
         }
     }
@@ -126,6 +148,9 @@ public class Player : MonoBehaviourPun
         {
             IsDone = isDone; // To force correcting the ui toggle
         }
+
+        UpdateMoveCountIndicator();
+        UpdatePredictionCountIndicator();
     }
 
     [PunRPC]
@@ -139,5 +164,18 @@ public class Player : MonoBehaviourPun
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         Vector3 zeroPoint = ray.origin - ray.direction * ray.origin.y / ray.direction.y;
         return BoardPosition.IfInBoard(zeroPoint);
+    }
+
+    void UpdateMoveCountIndicator()
+    {
+        _moveCountIndicator.text = $"{MoveCount}/{MAX_MOVES}";
+
+        _moveCountIndicator.color = MoveCountOk && AllMovesLegal ? UnityEngine.Color.white : UnityEngine.Color.red;
+    }
+
+    void UpdatePredictionCountIndicator()
+    {
+        _predictionCountIndicator.text = $"{PredictionCount}/{MAX_MOVES}";
+        _predictionCountIndicator.color = PredictionCountOk && AllPredictionsLegal ? UnityEngine.Color.white : UnityEngine.Color.red;
     }
 }
