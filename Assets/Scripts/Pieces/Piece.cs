@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Photon.Pun;
@@ -107,15 +107,14 @@ public abstract class Piece : MonoBehaviourPun
             while (Time.time < deathAnimEndTime)
             {
                 float passedTime = Time.time - moveAnimEndTime;
+                float progress = passedTime / ANIM_DIE_TIME;
 
-                float scale = 1 - (passedTime / ANIM_DIE_TIME);
-                float blobScale = 2 - scale * scale;
-                transform.localScale = new Vector3(blobScale * xScaleSign, scale, blobScale);
+                float scale = 1 - progress * 0.5f;
+                transform.localScale = new Vector3(scale * xScaleSign, scale, scale);
+                transform.position = Vector3.Lerp(startPosition, movePosition + transform.right * 0.3f, progress);
 
                 yield return null;
             }
-
-            Destroy(gameObject);
         }
     }
 
