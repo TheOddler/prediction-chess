@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _color: 0
+  _turnRenderer: {fileID: 8542525817878662656}
+  _previousTurnRenderer: {fileID: 329148532609491956}
 --- !u!1001 &2347118868623335763
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -116,6 +118,18 @@ PrefabInstance:
 --- !u!1 &6917629049314538096 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4653061555636261667, guid: 693e8c72a603a0747a6c1c6a373a3598,
+    type: 3}
+  m_PrefabInstance: {fileID: 2347118868623335763}
+  m_PrefabAsset: {fileID: 0}
+--- !u!120 &8542525817878662656 stripped
+LineRenderer:
+  m_CorrespondingSourceObject: {fileID: 6205821560996753235, guid: 693e8c72a603a0747a6c1c6a373a3598,
+    type: 3}
+  m_PrefabInstance: {fileID: 2347118868623335763}
+  m_PrefabAsset: {fileID: 0}
+--- !u!120 &329148532609491956 stripped
+LineRenderer:
+  m_CorrespondingSourceObject: {fileID: 2595193737742025383, guid: 693e8c72a603a0747a6c1c6a373a3598,
     type: 3}
   m_PrefabInstance: {fileID: 2347118868623335763}
   m_PrefabAsset: {fileID: 0}

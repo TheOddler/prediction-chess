@@ -82,6 +82,16 @@ PrefabInstance:
       propertyPath: m_Name
       value: Black Knight
       objectReference: {fileID: 0}
+    - target: {fileID: 3657735908372704420, guid: ba5dff55c94e2e141ba1d9e73c506a73,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: d4942e1abcecb0a4abd6b0201cca0bc1, type: 2}
+    - target: {fileID: 4674340923822014800, guid: ba5dff55c94e2e141ba1d9e73c506a73,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: d4942e1abcecb0a4abd6b0201cca0bc1, type: 2}
     - target: {fileID: 6429209765521399895, guid: ba5dff55c94e2e141ba1d9e73c506a73,
         type: 3}
       propertyPath: _color

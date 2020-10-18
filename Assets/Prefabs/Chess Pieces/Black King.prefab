@@ -7,6 +7,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 329148532609491956, guid: 7fc0c86cce354934fbc6d9039c225574,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: d4942e1abcecb0a4abd6b0201cca0bc1, type: 2}
     - target: {fileID: 1380346068961553951, guid: 7fc0c86cce354934fbc6d9039c225574,
         type: 3}
       propertyPath: _color
@@ -87,5 +92,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Black King
       objectReference: {fileID: 0}
+    - target: {fileID: 8542525817878662656, guid: 7fc0c86cce354934fbc6d9039c225574,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: d4942e1abcecb0a4abd6b0201cca0bc1, type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7fc0c86cce354934fbc6d9039c225574, type: 3}
