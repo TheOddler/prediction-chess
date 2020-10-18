@@ -28,8 +28,8 @@ public abstract class Piece : MonoBehaviourPun
         {
             var prev = _move;
             _move = value;
-            UpdateOtherPiecesLinerenderersWhereNeeded(value, prev);
-            UpdateLineRenderers();
+            UpdateOtherPiecesMoveIndicatorsWhereNeeded(value, prev);
+            UpdateMoveIndicators();
         }
     }
 
@@ -40,7 +40,7 @@ public abstract class Piece : MonoBehaviourPun
         private set
         {
             _prediction = value;
-            UpdateLineRenderers();
+            UpdateMoveIndicators();
         }
     }
 
@@ -50,6 +50,13 @@ public abstract class Piece : MonoBehaviourPun
     LineRenderer _turnRenderer;
     [SerializeField]
     LineRenderer _previousTurnRenderer;
+
+    MeshRenderer _meshRenderer;
+    Material _noMoveMaterial;
+    [SerializeField]
+    Material _legalMoveMaterial;
+    [SerializeField]
+    Material _illegalMoveMaterial;
 
     public virtual int Power
     {
@@ -79,12 +86,20 @@ public abstract class Piece : MonoBehaviourPun
         Assert.IsNotNull(_turnRenderer);
         Assert.IsNotNull(_previousTurnRenderer);
 
+        _meshRenderer = GetComponent<MeshRenderer>();
+        Assert.IsNotNull(_meshRenderer);
+
+        _noMoveMaterial = _meshRenderer.sharedMaterial;
+        Assert.IsNotNull(_noMoveMaterial);
+        Assert.IsNotNull(_legalMoveMaterial);
+        Assert.IsNotNull(_illegalMoveMaterial);
+
         var position = new BoardPosition(transform.position);
         transform.position = position.worldPosition;
 
         _previousPosition = position;
         _position = position;
-        UpdateLineRenderers();
+        UpdateMoveIndicators();
     }
 
     IEnumerator Animate(Vector3 startPosition, Vector3 movePosition, bool died, bool diedHalfway)
@@ -194,7 +209,7 @@ public abstract class Piece : MonoBehaviourPun
 
         StartCoroutine(Animate(_previousPosition.worldPosition, _position.worldPosition, false, false));
 
-        UpdateLineRenderers();
+        UpdateMoveIndicators();
 
         SetMove(null);
         SetPrediction(null);
@@ -212,12 +227,12 @@ public abstract class Piece : MonoBehaviourPun
         StartCoroutine(Animate(Position.worldPosition, positionToDieAt, true, diedHalfway));
     }
 
-    void UpdateLineRenderers()
+    void UpdateMoveIndicators()
     {
         Vector3 prevPos = _previousPosition.worldPosition;
         Vector3 pos = _position.worldPosition;
         Vector3 nextPos = pos; // Default
-        bool isLegal = false;
+        bool? isLegal = null;
 
         if (Move != null && IsMine())
         {
@@ -232,18 +247,20 @@ public abstract class Piece : MonoBehaviourPun
 
         prevPos.y = pos.y = nextPos.y = 0.2f;
         _turnRenderer.SetPositions(new[] { pos, nextPos });
-        _turnRenderer.endColor = isLegal ? UnityEngine.Color.green : UnityEngine.Color.red;
+        _turnRenderer.endColor = isLegal != false ? UnityEngine.Color.green : UnityEngine.Color.red;
 
         _previousTurnRenderer.SetPositions(new[] { prevPos, pos });
+
+        _meshRenderer.sharedMaterial = isLegal == null ? _noMoveMaterial : isLegal == true ? _legalMoveMaterial : _illegalMoveMaterial;
     }
 
-    void UpdateOtherPiecesLinerenderersWhereNeeded(BoardPosition? move, BoardPosition? prevMove)
+    void UpdateOtherPiecesMoveIndicatorsWhereNeeded(BoardPosition? move, BoardPosition? prevMove)
     {
         if (prevMove != null)
         {
             foreach (var friend in Friends.MovingTo((BoardPosition)prevMove))
             {
-                friend.UpdateLineRenderers();
+                friend.UpdateMoveIndicators();
             }
         }
 
@@ -252,7 +269,7 @@ public abstract class Piece : MonoBehaviourPun
             var friends = Friends.MovingTo((BoardPosition)move);
             foreach (var friend in friends)
             {
-                friend.UpdateLineRenderers();
+                friend.UpdateMoveIndicators();
             }
         }
     }

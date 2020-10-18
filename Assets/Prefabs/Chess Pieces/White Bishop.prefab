@@ -15,6 +15,9 @@ MonoBehaviour:
   _color: 0
   _turnRenderer: {fileID: 1069421353610275510}
   _previousTurnRenderer: {fileID: 8992318662860670786}
+  _legalMoveMaterial: {fileID: 2100000, guid: 432866451b509ee4f98c6e6407e8a857, type: 2}
+  _illegalMoveMaterial: {fileID: 2100000, guid: a2f0a2beff98b394d8f9c895701b41c4,
+    type: 2}
 --- !u!1001 &6397601703298041317
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -17,6 +17,16 @@ PrefabInstance:
       propertyPath: _color
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 1380346068961553951, guid: 7fc0c86cce354934fbc6d9039c225574,
+        type: 3}
+      propertyPath: _legalMoveMaterial
+      value: 
+      objectReference: {fileID: 2100000, guid: f466b4e67a1c9ae44802570bbcc5ba0a, type: 2}
+    - target: {fileID: 1380346068961553951, guid: 7fc0c86cce354934fbc6d9039c225574,
+        type: 3}
+      propertyPath: _illegalMoveMaterial
+      value: 
+      objectReference: {fileID: 2100000, guid: fb30053de9088684bb659cdc06ac083a, type: 2}
     - target: {fileID: 2123133462509257459, guid: 7fc0c86cce354934fbc6d9039c225574,
         type: 3}
       propertyPath: _color

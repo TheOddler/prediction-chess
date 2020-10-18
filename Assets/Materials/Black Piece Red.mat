@@ -20,8 +20,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Black Piece
-  m_Shader: {fileID: -6465566751694194690, guid: 2b99a7266ce64854ba72d783bc178d62,
+  m_Name: Black Piece Red
+  m_Shader: {fileID: -6465566751694194690, guid: df266ce22e0eae4448966d8efb47dad1,
     type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 4
@@ -62,8 +62,10 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Floats:
-    - Vector1_Color_Blen_Sharpness: 0
-    - Vector1_Color_Start: 0
+    - Vector1_Color_Blen_Sharpness: 0.67
+    - Vector1_Color_Falloff: 0.1
+    - Vector1_Color_Height: 0.15
+    - Vector1_Color_Start: 0.75
     - _AlphaClip: 0
     - _Blend: 0
     - _BumpScale: 1
@@ -87,7 +89,7 @@ Material:
     - _ZWrite: 1
     m_Colors:
     - Color_Main: {r: 0.0754717, g: 0.0754717, b: 0.0754717, a: 0}
-    - Color_Secondary: {r: 0, g: 1, b: 0.041554183, a: 0}
+    - Color_Secondary: {r: 0.5849056, g: 0.11863652, b: 0.11863652, a: 0}
     - _BaseColor: {r: 0, g: 0, b: 0, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
