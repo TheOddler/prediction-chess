@@ -124,7 +124,7 @@ public abstract class Piece : MonoBehaviourPun
         return Player.LocalNetworkPlayerColor() == _color;
     }
 
-    public void SetPos(BoardPosition pos)
+    private void SetPos(BoardPosition pos)
     {
         if (pos != Position)
         {
@@ -168,11 +168,6 @@ public abstract class Piece : MonoBehaviourPun
         return false;
     }
 
-    public void ResetMove()
-    {
-        SetMove(null);
-    }
-
     [PunRPC]
     protected void RPCSyncMove(BoardPosition? move)
     {
@@ -195,15 +190,18 @@ public abstract class Piece : MonoBehaviourPun
         return false;
     }
 
-    public void ResetPrediction()
-    {
-        SetPrediction(null);
-    }
-
     [PunRPC]
     protected void RPCSyncPrediction(BoardPosition? prediction)
     {
         Prediction = prediction;
+    }
+
+    public void ResolveTurn()
+    {
+        if (Move != null && !IsDead) SetPos((BoardPosition)Move);
+
+        SetMove(null);
+        SetPrediction(null);
     }
 
     public void Die(Vector3 positionToDieAt, bool diedHalfway)

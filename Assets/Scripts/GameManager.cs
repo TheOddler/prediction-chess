@@ -38,11 +38,11 @@ public class GameManager : MonoBehaviourPunCallbacks
     {
         if (PhotonNetwork.IsMasterClient)
         {
-            ResolveBattle();
+            ResolveTurn();
         }
     }
 
-    private void ResolveBattle()
+    private void ResolveTurn()
     {
         Debug.Log("ResolveBattle()");
 
@@ -74,12 +74,7 @@ public class GameManager : MonoBehaviourPunCallbacks
 
         foreach (var piece in pieces)
         {
-            // Move the pieces
-            if (piece.Move != null && !piece.IsDead) piece.SetPos((BoardPosition)piece.Move);
-
-            // Reset
-            piece.ResetMove();
-            piece.ResetPrediction();
+            piece.ResolveTurn();
         }
 
         // Reset players
