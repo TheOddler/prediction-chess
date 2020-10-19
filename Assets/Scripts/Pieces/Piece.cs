@@ -128,7 +128,7 @@ public abstract class Piece : MonoBehaviourPun
 
                 float scale = 1 - progress * (1 - DEATH_SIZE);
                 transform.localScale = new Vector3(scale * xScaleSign, scale, scale);
-                transform.position = Vector3.Lerp(startPosition, movePosition + transform.right * DEATH_OFFSET, progress);
+                transform.position = Vector3.Lerp(movePosition, movePosition + transform.right * DEATH_OFFSET, progress);
 
                 yield return null;
             }
