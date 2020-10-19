@@ -46,8 +46,14 @@ public class GameManager : MonoBehaviourPunCallbacks
     {
         Debug.Log("ResolveBattle()");
 
-        var pieces = Piece.All.ToArray();
+        var pieces = Piece.AllAlive.ToArray();
         int nbPieces = pieces.Length;
+
+        foreach (var piece in Piece.AllDead)
+        {
+            // Do this before the battles, so none of the newly died pieces get this
+            piece.ResolveTurnDead();
+        }
 
         for (int i = 0; i < pieces.Length - 1; ++i)
         {
@@ -72,9 +78,9 @@ public class GameManager : MonoBehaviourPunCallbacks
             }
         }
 
-        foreach (var piece in Piece.AllIncludingDead) // Include the dead so they can remove their move indicators and such
+        foreach (var piece in Piece.AllAlive)
         {
-            piece.ResolveTurn();
+            piece.ResolveTurnSurvived();
         }
 
         // Reset players
@@ -86,16 +92,16 @@ public class GameManager : MonoBehaviourPunCallbacks
     {
         if (first.Power == second.Power)
         {
-            first.Die(fightPosition, fightingHalfway);
-            second.Die(fightPosition, fightingHalfway);
+            first.ResolveTurnDied(fightPosition, fightingHalfway);
+            second.ResolveTurnDied(fightPosition, fightingHalfway);
         }
         else if (first.Power > second.Power)
         {
-            second.Die(fightPosition, fightingHalfway);
+            second.ResolveTurnDied(fightPosition, fightingHalfway);
         }
         else
         {
-            first.Die(fightPosition, fightingHalfway);
+            first.ResolveTurnDied(fightPosition, fightingHalfway);
         }
     }
 

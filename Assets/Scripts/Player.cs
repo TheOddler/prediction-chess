@@ -49,8 +49,8 @@ public class Player : MonoBehaviourPun
     public static Player RemotePlayer { get; private set; }
     public Player OtherPlayer => LocalPlayer == this ? RemotePlayer : LocalPlayer;
 
-    public IEnumerable<Piece> Pieces => Piece.All.OfColor(Color);
-    public IEnumerable<Piece> EnemyPieces => Piece.All.OfColor(Color.Invert());
+    public IEnumerable<Piece> Pieces => Piece.AllAlive.OfColor(Color);
+    public IEnumerable<Piece> EnemyPieces => Piece.AllAlive.OfColor(Color.Invert());
 
     public bool TurnIsLegal
     {
@@ -106,7 +106,7 @@ public class Player : MonoBehaviourPun
             if (Input.GetMouseButtonDown(0))
             {
                 var position = GetMousePosition();
-                _selected = Piece.All.AtPosition(position);
+                _selected = Piece.AllAlive.AtPosition(position);
             }
             else if (Input.GetMouseButton(0) && _selected != null)
             {

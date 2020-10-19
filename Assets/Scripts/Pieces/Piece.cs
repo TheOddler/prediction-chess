@@ -75,11 +75,12 @@ public abstract class Piece : MonoBehaviourPun
         }
     }
 
-    public static IEnumerable<Piece> AllIncludingDead => FindObjectsOfType<Piece>();
-    public static IEnumerable<Piece> All => AllIncludingDead.Where(p => !p.IsDead);
-    public IEnumerable<Piece> Others => All.Where(p => p != this);
+    public static IEnumerable<Piece> AllAliveAndDead => FindObjectsOfType<Piece>();
+    public static IEnumerable<Piece> AllAlive => AllAliveAndDead.Where(p => !p.IsDead);
+    public static IEnumerable<Piece> AllDead => AllAliveAndDead.Where(p => p.IsDead);
+    public IEnumerable<Piece> Others => AllAlive.Where(p => p != this);
     public IEnumerable<Piece> Friends => Others.OfColor(Color);
-    public IEnumerable<Piece> Enemies => All.OfColor(Color.Invert());
+    public IEnumerable<Piece> Enemies => AllAlive.OfColor(Color.Invert());
 
     void Awake()
     {
@@ -198,13 +199,13 @@ public abstract class Piece : MonoBehaviourPun
         Prediction = prediction;
     }
 
-    public void ResolveTurn()
+    public void ResolveTurnSurvived()
     {
-        photonView.RPC(nameof(RPCResolveTurn), RpcTarget.All);
+        photonView.RPC(nameof(RPCResolveTurnSurvived), RpcTarget.All);
     }
 
     [PunRPC]
-    protected void RPCResolveTurn()
+    protected void RPCResolveTurnSurvived()
     {
         _previousPosition = Position;
         if (Move != null)
@@ -223,16 +224,27 @@ public abstract class Piece : MonoBehaviourPun
         SetPrediction(null);
     }
 
-    public void Die(Vector3 positionToDieAt, bool diedHalfway)
+    public void ResolveTurnDied(Vector3 positionToDieAt, bool diedHalfway)
     {
-        photonView.RPC(nameof(RPCDie), RpcTarget.All, positionToDieAt, diedHalfway);
+        photonView.RPC(nameof(RPCResolveTurnDied), RpcTarget.All, positionToDieAt, diedHalfway);
     }
 
     [PunRPC]
-    protected void RPCDie(Vector3 positionToDieAt, bool diedHalfway)
+    protected void RPCResolveTurnDied(Vector3 positionToDieAt, bool diedHalfway)
     {
         IsDead = true;
         StartCoroutine(Animate(Position.worldPosition, positionToDieAt, true, diedHalfway));
+    }
+
+    public void ResolveTurnDead()
+    {
+        photonView.RPC(nameof(RPCResolveTurnDead), RpcTarget.All);
+    }
+
+    [PunRPC]
+    protected void RPCResolveTurnDead()
+    {
+        Destroy(gameObject);
     }
 
     void UpdateMoveIndicators()
