@@ -72,7 +72,7 @@ public class GameManager : MonoBehaviourPunCallbacks
             }
         }
 
-        foreach (var piece in pieces)
+        foreach (var piece in Piece.AllIncludingDead) // Include the dead so they can remove their move indicators and such
         {
             piece.ResolveTurn();
         }

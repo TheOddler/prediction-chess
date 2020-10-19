@@ -75,8 +75,8 @@ public abstract class Piece : MonoBehaviourPun
         }
     }
 
-    public static IEnumerable<Piece> AllAndDying => FindObjectsOfType<Piece>();
-    public static IEnumerable<Piece> All => AllAndDying.Where(p => !p.IsDead);
+    public static IEnumerable<Piece> AllIncludingDead => FindObjectsOfType<Piece>();
+    public static IEnumerable<Piece> All => AllIncludingDead.Where(p => !p.IsDead);
     public IEnumerable<Piece> Others => All.Where(p => p != this);
     public IEnumerable<Piece> Friends => Others.OfColor(Color);
     public IEnumerable<Piece> Enemies => All.OfColor(Color.Invert());
