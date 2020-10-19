@@ -103,7 +103,7 @@ public abstract class Piece : MonoBehaviourPun
         UpdateMoveIndicators();
     }
 
-    IEnumerator Animate(Vector3 startPosition, Vector3 movePosition, bool died, bool diedHalfway)
+    IEnumerator Animate(Vector3 startPosition, Vector3 endPosition, bool died, bool diedHalfway)
     {
         float startTime = Time.time;
         float animMoveTime = ANIM_MOVE_TIME / (died && diedHalfway ? 2f : 1f);
@@ -113,12 +113,12 @@ public abstract class Piece : MonoBehaviourPun
         {
             float passedTime = Time.time - startTime;
             float progress = passedTime / animMoveTime;
-            transform.position = Vector3.Lerp(startPosition, movePosition, progress);
+            transform.position = Vector3.Lerp(startPosition, endPosition, progress);
 
             yield return null;
         }
 
-        transform.position = movePosition;
+        transform.position = endPosition;
 
         if (died)
         {
@@ -131,7 +131,7 @@ public abstract class Piece : MonoBehaviourPun
 
                 float scale = 1 - progress * (1 - DEATH_SIZE);
                 transform.localScale = new Vector3(scale * xScaleSign, scale, scale);
-                transform.position = Vector3.Lerp(movePosition, movePosition + transform.right * DEATH_OFFSET, progress);
+                transform.position = Vector3.Lerp(endPosition, endPosition + transform.right * DEATH_OFFSET, progress);
 
                 yield return null;
             }
@@ -207,21 +207,8 @@ public abstract class Piece : MonoBehaviourPun
     [PunRPC]
     protected void RPCResolveTurnSurvived()
     {
-        _previousPosition = Position;
-        if (Move != null)
-        {
-            _position = (BoardPosition)Move;
-        }
-
-        if (!IsDead)
-        {
-            StartCoroutine(Animate(_previousPosition.worldPosition, _position.worldPosition, false, false));
-        }
-
-        UpdateMoveIndicators();
-
-        SetMove(null);
-        SetPrediction(null);
+        ResolveTurnCommon();
+        StartCoroutine(Animate(_previousPosition.worldPosition, _position.worldPosition, false, false));
     }
 
     public void ResolveTurnDied(Vector3 positionToDieAt, bool diedHalfway)
@@ -233,7 +220,22 @@ public abstract class Piece : MonoBehaviourPun
     protected void RPCResolveTurnDied(Vector3 positionToDieAt, bool diedHalfway)
     {
         IsDead = true;
-        StartCoroutine(Animate(Position.worldPosition, positionToDieAt, true, diedHalfway));
+        ResolveTurnCommon();
+        StartCoroutine(Animate(_previousPosition.worldPosition, positionToDieAt, true, diedHalfway));
+    }
+
+    private void ResolveTurnCommon()
+    {
+        _previousPosition = Position;
+        if (Move != null)
+        {
+            _position = (BoardPosition)Move;
+        }
+
+        UpdateMoveIndicators();
+
+        SetMove(null);
+        SetPrediction(null);
     }
 
     public void ResolveTurnDead()

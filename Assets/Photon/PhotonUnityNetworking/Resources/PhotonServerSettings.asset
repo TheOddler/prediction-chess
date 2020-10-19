@@ -49,6 +49,9 @@ MonoBehaviour:
   - RPCDie
   - RPCSyncIsDead
   - RPCResolveTurn
+  - RPCResolveTurnDead
+  - RPCResolveTurnDied
+  - RPCResolveTurnSurvived
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 1
