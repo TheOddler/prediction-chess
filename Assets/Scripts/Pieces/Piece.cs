@@ -105,12 +105,14 @@ public abstract class Piece : MonoBehaviourPun
     IEnumerator Animate(Vector3 startPosition, Vector3 movePosition, bool died, bool diedHalfway)
     {
         float startTime = Time.time;
-        float moveAnimEndTime = startTime + ANIM_MOVE_TIME / (died && diedHalfway ? 2f : 1f);
+        float animMoveTime = ANIM_MOVE_TIME / (died && diedHalfway ? 2f : 1f);
+        float moveAnimEndTime = startTime + animMoveTime;
 
         while (Time.time < moveAnimEndTime)
         {
             float passedTime = Time.time - startTime;
-            transform.position = Vector3.Lerp(startPosition, movePosition, passedTime / ANIM_MOVE_TIME);
+            float progress = passedTime / animMoveTime;
+            transform.position = Vector3.Lerp(startPosition, movePosition, progress);
 
             yield return null;
         }
@@ -205,9 +207,15 @@ public abstract class Piece : MonoBehaviourPun
     protected void RPCResolveTurn()
     {
         _previousPosition = Position;
-        if (Move != null) _position = (BoardPosition)Move;
+        if (Move != null)
+        {
+            _position = (BoardPosition)Move;
+        }
 
-        StartCoroutine(Animate(_previousPosition.worldPosition, _position.worldPosition, false, false));
+        if (!IsDead)
+        {
+            StartCoroutine(Animate(_previousPosition.worldPosition, _position.worldPosition, false, false));
+        }
 
         UpdateMoveIndicators();
 
