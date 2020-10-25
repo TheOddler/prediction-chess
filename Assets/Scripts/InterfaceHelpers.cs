@@ -12,4 +12,9 @@ public class InterfaceHelpers : MonoBehaviour
     {
         Player.LocalPlayer.SetIsDone(isDone);
     }
+
+    public void ResetTurn()
+    {
+        Player.LocalPlayer.ResetTurn();
+    }
 }

@@ -121,6 +121,22 @@ public class Player : MonoBehaviourPun
         }
     }
 
+    public void ResetTurn()
+    {
+        foreach (var piece in Pieces)
+        {
+            piece.SetMove(null);
+        }
+
+        foreach (var piece in EnemyPieces)
+        {
+            piece.SetPrediction(null);
+        }
+
+        UpdateMoveCountIndicator();
+        UpdatePredictionCountIndicator();
+    }
+
     bool IsMe()
     {
         return LocalNetworkPlayerColor() == _color;
