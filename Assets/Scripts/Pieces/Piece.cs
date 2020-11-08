@@ -75,6 +75,8 @@ public abstract class Piece : MonoBehaviourPun
         }
     }
 
+    public bool IsMine => Player.LocalNetworkPlayerColor() == _color;
+
     public static IEnumerable<Piece> AllAliveAndDead => FindObjectsOfType<Piece>();
     public static IEnumerable<Piece> AllAlive => AllAliveAndDead.Where(p => !p.IsDead);
     public static IEnumerable<Piece> AllDead => AllAliveAndDead.Where(p => p.IsDead);
@@ -138,14 +140,9 @@ public abstract class Piece : MonoBehaviourPun
         }
     }
 
-    public bool IsMine()
-    {
-        return Player.LocalNetworkPlayerColor() == _color;
-    }
-
     public bool SetMoveOrPrediction(BoardPosition? position)
     {
-        if (IsMine())
+        if (IsMine)
         {
             return SetMove(position);
         }
@@ -256,12 +253,12 @@ public abstract class Piece : MonoBehaviourPun
         Vector3 nextPos = pos; // Default
         bool? isLegal = null;
 
-        if (Move != null && IsMine())
+        if (Move != null && IsMine)
         {
             nextPos = ((BoardPosition)Move).worldPosition;
             isLegal = MoveIsLegal();
         }
-        else if (Prediction != null && !IsMine())
+        else if (Prediction != null && !IsMine)
         {
             nextPos = ((BoardPosition)Prediction).worldPosition;
             isLegal = PredictionIsLegal();
