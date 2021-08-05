@@ -3,7 +3,6 @@ using Photon.Pun;
 using UnityEngine.SceneManagement;
 using UnityEngine.Assertions;
 using System.Linq;
-using System.Collections.Generic;
 
 public class GameManager : MonoBehaviourPunCallbacks
 {
@@ -14,24 +13,27 @@ public class GameManager : MonoBehaviourPunCallbacks
     {
         Assert.IsNull(_instance);
         _instance = this;
+    }
 
-        CustomTypeSerialization.RegisterTypes();
+    void Start()
+    {
+        RequestDataSync();
+    }
 
-        if (Application.isEditor && SceneManager.GetActiveScene().buildIndex != 0 && !PhotonNetwork.IsConnected)
+    public void RequestDataSync()
+    {
+        photonView.RPC(nameof(RPCRequestDataSync), RpcTarget.MasterClient); // Master client is considered to have the truth
+    }
+
+    [PunRPC]
+    private void RPCRequestDataSync()
+    {
+        Debug.Log("RPCRequestDataSync");
+        foreach (var netObject in GetComponents<ISyncsData>())
         {
-            PhotonNetwork.OfflineMode = true;
-            PhotonNetwork.JoinRandomRoom();
+            netObject.PushData();
+            Debug.Log("PushData");
         }
-    }
-
-    void OnApplicationQuit()
-    {
-        PhotonNetwork.Disconnect();
-    }
-
-    public override void OnLeftRoom()
-    {
-        SceneManager.LoadScene(0);
     }
 
     public void HandleBothPlayersDone()

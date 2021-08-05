@@ -5,7 +5,7 @@ using Photon.Pun;
 using UnityEngine;
 using UnityEngine.Assertions;
 
-public abstract class Piece : MonoBehaviourPun
+public abstract class Piece : MonoBehaviourPun, ISyncsData
 {
     const float ANIM_MOVE_TIME = 1.0f;
     const float ANIM_DIE_TIME = 0.5f;
@@ -237,7 +237,7 @@ public abstract class Piece : MonoBehaviourPun
 
     public void ResolveTurnDead()
     {
-        photonView.RPC(nameof(RPCResolveTurnDead), RpcTarget.All);
+        photonView.RPC(nameof(RPCResolveTurnDead), RpcTarget.AllBufferedViaServer); // Buffer this, so users joining later will have this piece destroyed too
     }
 
     [PunRPC]
@@ -351,5 +351,22 @@ public abstract class Piece : MonoBehaviourPun
         }
 
         return legalDestinations;
+    }
+
+    public void PushData()
+    {
+        photonView.RPC(nameof(RPCReceiveData), RpcTarget.Others, _position, _previousPosition, _move, _prediction, IsDead);
+    }
+
+    [PunRPC]
+    protected void RPCReceiveData(BoardPosition position, BoardPosition prevPos, BoardPosition? move, BoardPosition? prediction, bool isDead)
+    {
+        _position = position;
+        _previousPosition = prevPos;
+        _move = move;
+        _prediction = prediction;
+        IsDead = isDead;
+
+        UpdateMoveIndicators();
     }
 }

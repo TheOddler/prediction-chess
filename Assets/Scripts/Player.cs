@@ -9,7 +9,7 @@ using System.Linq;
 
 [RequireComponent(typeof(Camera))]
 [RequireComponent(typeof(AudioListener))]
-public class Player : MonoBehaviourPun
+public class Player : MonoBehaviourPun, ISyncsData
 {
     const int MAX_MOVES = 3;
     const int MAX_PREDICTIONS = 3;
@@ -193,5 +193,17 @@ public class Player : MonoBehaviourPun
     {
         _predictionCountIndicator.text = $"{PredictionCount}/{MAX_MOVES}";
         _predictionCountIndicator.color = PredictionCountOk && AllPredictionsLegal ? UnityEngine.Color.white : UnityEngine.Color.red;
+    }
+
+    public void PushData()
+    {
+        photonView.RPC(nameof(RPCReceiveData), RpcTarget.Others, IsDone);
+    }
+
+    [PunRPC]
+    protected void RPCReceiveData(bool isDone)
+    {
+        IsDone = isDone;
+        Debug.Log("Player RPCReceiveData");
     }
 }
